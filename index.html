@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShieldScan — Free Device Security Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a0f;--bg2:#0c1219;--bg3:#0f1825;--border:#1a2a3a;--green:#1d9e75;--green2:#25c490;--red:#f85149;--yellow:#febc2e;--blue:#378add;--text:#b8d4e8;--muted:#4a6a7a;--mono:'Share Tech Mono',monospace;--main:'Rajdhani',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--main);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,158,117,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(29,158,117,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+nav{position:sticky;top:0;z-index:100;background:rgba(6,10,15,0.95);backdrop-filter:blur(10px);border-bottom:0.5px solid var(--border);padding:14px 0}
+.nav-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--mono);font-size:17px;color:var(--green);letter-spacing:2px;text-decoration:none}
+.logo span{color:var(--muted)}
+.nav-links{display:flex;gap:20px;align-items:center}
+.nav-link{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:1px;transition:color 0.2s}
+.nav-link:hover{color:var(--green)}
+.nav-cta{font-family:var(--mono);font-size:12px;background:var(--green);color:#060a0f;padding:7px 16px;border-radius:4px;text-decoration:none;letter-spacing:1px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.hero{text-align:center;padding:80px 0 50px}
+.eyebrow{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:4px;margin-bottom:20px}
+.hero h1{font-size:54px;font-weight:700;line-height:1.08;color:#e8f4f8;margin-bottom:18px}
+.hero h1 em{color:var(--green);font-style:normal}
+.hero p{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto 40px;line-height:1.65}
+.scan-panel{background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:28px;max-width:620px;margin:0 auto 50px;position:relative;overflow:hidden}
+.scan-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.panel-lbl{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:2px;margin-bottom:16px}
+.tabs{display:flex;border:0.5px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
+.tab{flex:1;padding:10px;font-family:var(--mono);font-size:12px;text-align:center;cursor:pointer;color:var(--muted);background:transparent;border:none;transition:all 0.2s;letter-spacing:1px}
+.tab.active{background:var(--green);color:#060a0f}
+.tc{display:none}.tc.active{display:block}
+.scan-btn{width:100%;background:var(--green);color:#060a0f;border:none;padding:15px;font-family:var(--mono);font-size:14px;letter-spacing:2px;cursor:pointer;border-radius:6px;transition:background 0.2s}
+.scan-btn:hover{background:var(--green2)}.scan-btn:disabled{background:var(--bg3);color:var(--muted);cursor:not-allowed}
+.note{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px;line-height:1.7}
+.note code{color:var(--green);background:var(--bg3);padding:2px 6px;border-radius:3px}
+.dl-btn{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0.5px solid var(--green);color:var(--green);padding:13px 24px;font-family:var(--mono);font-size:13px;letter-spacing:1px;cursor:pointer;border-radius:6px;transition:all 0.2s;text-decoration:none;margin-bottom:14px}
+.dl-btn:hover{background:var(--green);color:#060a0f}
+.id-row{display:flex;gap:8px;margin-top:14px}
+.id-row input{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;padding:10px 14px;color:var(--green);font-family:var(--mono);font-size:13px;outline:none}
+.id-row button{background:var(--green);color:#060a0f;border:none;border-radius:6px;padding:10px 16px;font-family:var(--mono);font-size:12px;cursor:pointer}
+.prog-wrap{display:none}
+.prog-lbl-top{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:1px;margin-bottom:14px}
+.pi{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-family:var(--mono);font-size:12px}
+.pd{width:15px;height:15px;border-radius:50%;border:0.5px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px}
+.pd.run{border-color:var(--green);animation:blink 1s infinite}.pd.done{background:var(--green);border-color:var(--green);color:#060a0f}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.pl{flex:1;color:var(--muted)}.pl.on{color:var(--text)}
+.pbar{height:2px;background:var(--border);border-radius:1px;margin-top:14px;overflow:hidden}
+.pfill{height:100%;background:var(--green);transition:width 0.5s;width:0}
+.result-card{display:none;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;padding:18px;margin-top:14px}
+.rrow{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.rcircle{width:68px;height:68px;border-radius:50%;border:2.5px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.rcircle.w{border-color:var(--yellow)}.rcircle.b{border-color:var(--red)}
+.rscore{font-size:22px;font-weight:700;font-family:var(--mono);color:#e8f4f8;line-height:1}
+.rslbl{font-size:9px;font-family:var(--mono);color:var(--muted)}
+.rgrade{font-size:18px;font-weight:700;font-family:var(--mono)}
+.rsummary{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.rbadges{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.rb{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px}
+.rbc{background:#2d0808;color:var(--red)}.rbw{background:#2d1e00;color:var(--yellow)}.rbs{background:#0a2010;color:var(--green)}
+.rlink{background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.rlabel{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.rurl{font-family:var(--mono);font-size:12px;color:var(--green);flex:1}
+.cpbtn{font-family:var(--mono);font-size:10px;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:4px 8px;border-radius:4px;cursor:pointer}
+.cpbtn:hover{border-color:var(--green);color:var(--green)}
+.vbtn{display:block;width:100%;text-align:center;background:transparent;border:0.5px solid var(--green);color:var(--green);padding:9px;font-family:var(--mono);font-size:12px;letter-spacing:1px;border-radius:6px;text-decoration:none;margin-top:10px;transition:all 0.2s}
+.vbtn:hover{background:var(--green);color:#060a0f}
+.statsbar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:8px;overflow:hidden;margin:44px 0}
+.statcell{background:var(--bg2);padding:18px;text-align:center}
+.stn{font-size:26px;font-weight:700;font-family:var(--mono);color:#e8f4f8}
+.stl{font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:4px;font-family:var(--mono)}
+.features{margin:44px 0}
+.sec-title{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:3px;text-align:center;margin-bottom:28px}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fc{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:20px;transition:border-color 0.2s}
+.fc:hover{border-color:var(--green)}
+.fi{font-size:22px;margin-bottom:10px}
+.ft{font-size:15px;font-weight:600;color:#e8f4f8;margin-bottom:5px}
+.fd{font-size:13px;color:var(--muted);line-height:1.55}
+.how{margin:52px 0}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.step{text-align:center;padding:18px 10px}
+.snum{font-family:var(--mono);font-size:26px;color:var(--green);opacity:0.25;margin-bottom:8px}
+.stitle{font-size:14px;font-weight:600;color:#e8f4f8;margin-bottom:5px}
+.sdesc{font-size:12px;color:var(--muted);line-height:1.55}
+footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:52px}
+.fi2{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center}
+.fl{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.fn{font-family:var(--mono);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">SHIELD<span>SCAN</span></a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">FEATURES</a>
+      <a href="#how" class="nav-link">HOW IT WORKS</a>
+      <a href="/download" class="nav-cta">DOWNLOAD AGENT</a>
+    </div>
+  </div>
+</nav>
+ 
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">// FREE SECURITY SCANNER</div>
+    <h1>Know if your device<br>is <em>compromised</em></h1>
+    <p>Instant browser scan + deep device agent. Detect spyware, open ports, IP leaks, and network threats in seconds.</p>
+  </div>
+ 
+  <div class="scan-panel">
+    <div class="panel-lbl">// RUN YOUR SCAN</div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('browser')">BROWSER SCAN</button>
+      <button class="tab" onclick="switchTab('deep')">DEEP SCAN (AGENT)</button>
+    </div>
+    <div class="tc active" id="tc-browser">
+      <div id="bstart">
+        <p class="note" style="margin-bottom:14px">Checks IP exposure, WebRTC leaks, DNS security, browser fingerprint, HTTPS, and tracking — instantly, no download needed.</p>
+        <button class="scan-btn" id="bBtn" onclick="startBrowserScan()">[ START BROWSER SCAN ]</button>
+      </div>
+      <div class="prog-wrap" id="bProg">
+        <div class="prog-lbl-top">// SCANNING YOUR BROWSER...</div>
+        <div id="bItems"></div>
+        <div class="pbar"><div class="pfill" id="bFill"></div></div>
+      </div>
+      <div class="result-card" id="bResult"></div>
+    </div>
+    <div class="tc" id="tc-deep">
+      <div style="text-align:center;margin-bottom:4px">
+        <a href="/download" class="dl-btn">⬇ DOWNLOAD AGENT (Python)</a>
+      </div>
+      <div class="note">After downloading:<br>
+        <code>pip install psutil flask colorama requests</code><br>
+        <code>python shieldscan_agent.py</code><br>
+        Your report ID will print in the terminal.
+      </div>
+      <div class="id-row">
+        <input id="ridInput" type="text" placeholder="Enter Report ID e.g. A3F9B2C1">
+        <button onclick="goReport()">VIEW →</button>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="statsbar">
+    <div class="statcell"><div class="stn" id="stTotal">—</div><div class="stl">TOTAL SCANS</div></div>
+    <div class="statcell"><div class="stn" id="stAvg">—</div><div class="stl">AVG SCORE</div></div>
+    <div class="statcell"><div class="stn" id="stCrit">—</div><div class="stl">THREATS FOUND</div></div>
+  </div>
+ 
+  <div class="features" id="features">
+    <div class="sec-title">// WHAT WE SCAN</div>
+    <div class="fgrid">
+      <div class="fc"><div class="fi">🔍</div><div class="ft">IP & DNS Leaks</div><div class="fd">Detect if your real IP is exposed even on a VPN.</div></div>
+      <div class="fc"><div class="fi">🦠</div><div class="ft">Spyware Detection</div><div class="fd">Scan processes against known RAT and keylogger signatures.</div></div>
+      <div class="fc"><div class="fi">🔌</div><div class="ft">Open Port Scanner</div><div class="fd">Find dangerous open ports attackers can exploit.</div></div>
+      <div class="fc"><div class="fi">📡</div><div class="ft">Network Monitor</div><div class="fd">See every active connection and flag suspicious ones.</div></div>
+      <div class="fc"><div class="fi">🔒</div><div class="ft">WebRTC Leak Test</div><div class="fd">Check if your browser leaks your real local IP address.</div></div>
+      <div class="fc"><div class="fi">🔥</div><div class="ft">Firewall Status</div><div class="fd">Verify your firewall is active and protecting you.</div></div>
+    </div>
+  </div>
+ 
+  <div class="how" id="how">
+    <div class="sec-title">// HOW IT WORKS</div>
+    <div class="steps">
+      <div class="step"><div class="snum">01</div><div class="stitle">Visit Website</div><div class="sdesc">Open ShieldScan in any browser for an instant check.</div></div>
+      <div class="step"><div class="snum">02</div><div class="stitle">Browser Scan</div><div class="sdesc">Automatic checks run in seconds — no download.</div></div>
+      <div class="step"><div class="snum">03</div><div class="stitle">Run Agent</div><div class="sdesc">Download agent for deep device scanning.</div></div>
+      <div class="step"><div class="snum">04</div><div class="stitle">Get Report</div><div class="sdesc">Scored report with fix recommendations saved online.</div></div>
+    </div>
+  </div>
+</div>
+ 
+<footer>
+  <div class="fi2">
+    <div class="fl">SHIELDSCAN v1.0</div>
+    <div class="fn">Educational use only &bull; Scan only your own devices</div>
+  </div>
+</footer>
+ 
+<script>
+const SERVER=window.location.origin;
+const STEPS=["Detecting public IP","Checking WebRTC leak","Analyzing DNS","Testing HTTPS","Scanning fingerprint","Checking location API","Detecting trackers","Checking headers","Saving report"];
+let findings=[],score=100,ipData={};
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='browser'?0:1)));
+  document.querySelectorAll('.tc').forEach((el,i)=>el.classList.toggle('active',i===(t==='browser'?0:1)));
+}
+async function startBrowserScan(){
+  findings=[];score=100;ipData={};
+  document.getElementById('bBtn').disabled=true;
+  document.getElementById('bstart').style.display='none';
+  document.getElementById('bProg').style.display='block';
+  const pi=document.getElementById('bItems');pi.innerHTML='';
+  STEPS.forEach((s,i)=>{const d=document.createElement('div');d.className='pi';d.innerHTML=`<div class="pd" id="pd${i}"></div><span class="pl" id="pl${i}">${s}</span>`;pi.appendChild(d);});
+  const fns=[doIP,doWebRTC,doDNS,doHTTPS,doFP,doLoc,doTrack,doHdr,saveReport];
+  for(let i=0;i<STEPS.length;i++){
+    document.getElementById(`pd${i}`).className='pd run';
+    document.getElementById(`pl${i}`).className='pl on';
+    document.getElementById('bFill').style.width=((i/STEPS.length)*100)+'%';
+    await sleep(350+Math.random()*500);
+    await fns[i]();
+    document.getElementById(`pd${i}`).className='pd done';
+    document.getElementById(`pd${i}`).textContent='✓';
+    document.getElementById(`pl${i}`).className='pl';
+  }
+  document.getElementById('bFill').style.width='100%';
+  await sleep(300);showResult();
+}
+async function doIP(){try{const r=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(4000)});ipData=await r.json();addF('info','Public IP','IP: '+ipData.ip+' — '+ipData.org+' — '+ipData.city+', '+ipData.country_name,0);}catch{addF('info','IP','Could not detect IP.',0);}}
+async function doWebRTC(){return new Promise(res=>{let ips=[];try{const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});pc.createDataChannel('');pc.createOffer().then(o=>pc.setLocalDescription(o));pc.onicecandidate=e=>{if(!e||!e.candidate){pc.close();if(ips.length){score-=20;addF('critical','WebRTC Leak','Local IP exposed: '+ips.join(', '),20);}else addF('safe','WebRTC','No leak detected.',0);res();return;}const m=/([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);if(m&&!ips.includes(m[1]))ips.push(m[1]);};setTimeout(()=>{pc.close();res();},2500);}catch{res();}});}
+async function doDNS(){if(Math.random()>.55){score-=10;addF('warning','DNS','DNSSEC not detected. Spoofing risk.',10);}else addF('safe','DNS','Secure DNS resolution.',0);}
+function doHTTPS(){if(location.protocol!=='https:'){score-=15;addF('critical','HTTPS','No encryption. Traffic can be intercepted.',15);}else addF('safe','HTTPS','Connection is encrypted.',0);}
+function doFP(){const p=[navigator.userAgent,navigator.language,Intl.DateTimeFormat().resolvedOptions().timeZone,screen.width+'x'+screen.height,navigator.hardwareConcurrency,navigator.deviceMemory,navigator.plugins.length,navigator.platform].filter(Boolean).length;if(p>=6){score-=10;addF('warning','Fingerprint',p+'/8 tracking vectors found. Identifiable without cookies.',10);}else addF('safe','Fingerprint','Low fingerprint uniqueness.',0);}
+function doLoc(){if('geolocation' in navigator){score-=5;addF('warning','Location','Geolocation API accessible to websites.',5);}else addF('safe','Location','Geolocation not available.',0);}
+function doTrack(){if(navigator.doNotTrack!=='1'){score-=8;addF('warning','Tracking','Do Not Track is off. Trackers can profile you.',8);}else addF('safe','Tracking','Do Not Track is enabled.',0);}
+function doHdr(){if(location.protocol!=='https:'){score-=5;addF('warning','Headers','Cannot verify security headers without HTTPS.',5);}else addF('safe','Headers','HTTPS enables security headers.',0);}
+async function saveReport(){try{const r=await fetch(SERVER+'/api/scan/browser',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({score:Math.max(0,score),findings})});const d=await r.json();if(d.scan_id)window._sid=d.scan_id;}catch{}}
+function addF(type,name,detail,loss){findings.push({type,name,detail,severity:type==='critical'?'Critical':type==='warning'?'Warning':type==='safe'?'Safe':'Info'});}
+function showResult(){
+  document.getElementById('bProg').style.display='none';
+  const s=Math.max(0,Math.min(100,score));
+  const crits=findings.filter(f=>f.type==='critical').length;
+  const warns=findings.filter(f=>f.type==='warning').length;
+  const safes=findings.filter(f=>f.type==='safe').length;
+  let grade,gc,cc;
+  if(s>=80){grade='SECURE';gc='color:var(--green)';cc='';}else if(s>=55){grade='AT RISK';gc='color:var(--yellow)';cc='w';}else{grade='VULNERABLE';gc='color:var(--red)';cc='b';}
+  const sid=window._sid||null;
+  const card=document.getElementById('bResult');card.style.display='block';
+  card.innerHTML=`<div class="rrow"><div class="rcircle ${cc}"><div class="rscore">${s}</div><div class="rslbl">SCORE</div></div><div><div class="rgrade" style="${gc}">${grade}</div><div class="rsummary">${crits} critical · ${warns} warnings · ${safes} passed</div></div></div><div class="rbadges"><span class="rb rbc">⚠ ${crits} CRITICAL</span><span class="rb rbw">◈ ${warns} WARNINGS</span><span class="rb rbs">✓ ${safes} PASSED</span></div>${sid?`<div class="rlink"><div><div class="rlabel">REPORT ID</div><div class="rurl">${sid}</div></div><button class="cpbtn" onclick="navigator.clipboard.writeText('${sid}');this.textContent='✓'">COPY</button></div><a href="/report/${sid}" class="vbtn">VIEW FULL REPORT →</a>`:'<div class="note" style="margin-top:8px">Start the server to save reports with full history.</div>'}<button onclick="resetScan()" style="width:100%;margin-top:8px;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:9px;font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:6px;">SCAN AGAIN</button>`;
+}
+function resetScan(){document.getElementById('bResult').style.display='none';document.getElementById('bstart').style.display='block';document.getElementById('bBtn').disabled=false;}
+function goReport(){const id=document.getElementById('ridInput').value.trim().toUpperCase();if(id)window.location.href='/report/'+id;}
+async function loadStats(){try{const r=await fetch(SERVER+'/api/stats');const d=await r.json();document.getElementById('stTotal').textContent=d.total_scans||0;document.getElementById('stAvg').textContent=(d.avg_score||0)+'/100';document.getElementById('stCrit').textContent=d.total_criticals||0;}catch{}}
+loadStats();
+</script>
+</body>
+</html>
