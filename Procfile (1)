@@ -1,1 +1,1 @@
-web: gunicorn server:app --bind 0.0.0.0:8080
+rm /mnt/user-data/outputs/Procfile && echo "web: gunicorn server:app --bind 0.0.0.0:8080 --workers 1 --timeout 120" > /mnt/user-data/outputs/Procfile && echo done
