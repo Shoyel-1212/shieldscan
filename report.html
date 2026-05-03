@@ -3,118 +3,424 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ShieldScan — Report</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<title>ShieldScan — Security Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#060a0f;--bg2:#0c1219;--bg3:#0f1825;--border:#1a2a3a;--green:#1d9e75;--red:#f85149;--yellow:#febc2e;--blue:#378add;--text:#b8d4e8;--muted:#4a6a7a;--mono:'Share Tech Mono',monospace;--main:'Rajdhani',sans-serif}
+:root{
+  --bg:#060a0f;--bg2:#0c1219;--bg3:#0f1825;--bg4:#081018;
+  --border:#1a2a3a;--border2:#243545;
+  --green:#00ff9d;--green2:#00cc7a;--green3:rgba(0,255,157,0.08);
+  --red:#ff4757;--red2:rgba(255,71,87,0.1);
+  --yellow:#ffd32a;--yellow2:rgba(255,211,42,0.08);
+  --blue:#4fc3f7;--blue2:rgba(79,195,247,0.08);
+  --text:#c8dde8;--muted:#4a6a7a;--bright:#e8f8ff;
+  --mono:'Share Tech Mono',monospace;
+  --display:'Orbitron',sans-serif;
+  --main:'Rajdhani',sans-serif;
+  --glow:0 0 20px rgba(0,255,157,0.25);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--main)}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,158,117,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(29,158,117,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
-nav{background:rgba(6,10,15,0.95);border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
-.logo{font-family:var(--mono);font-size:16px;color:var(--green);letter-spacing:2px;text-decoration:none}
-.logo span{color:var(--muted)}
-.wrap{max-width:860px;margin:0 auto;padding:28px 24px 60px;position:relative;z-index:1}
-.loading{text-align:center;padding:80px;font-family:var(--mono);color:var(--muted)}
-.spin{display:inline-block;animation:spin 1s linear infinite;font-size:28px;margin-bottom:12px}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--main);overflow-x:hidden;min-height:100vh}
+
+/* SCANLINES */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,157,0.008) 3px,rgba(0,255,157,0.008) 4px);pointer-events:none;z-index:9999}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,255,157,0.04) 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,rgba(79,195,247,0.03) 0%,transparent 40%);pointer-events:none;z-index:0}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(6,10,15,0.95);backdrop-filter:blur(16px);border-bottom:0.5px solid var(--border);padding:13px 0}
+.nav-inner{max-width:1000px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--display);font-size:13px;color:var(--green);letter-spacing:3px;text-decoration:none;text-shadow:var(--glow)}
+.logo span{color:var(--muted);text-shadow:none}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-id{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px}
+.nav-back{font-family:var(--mono);font-size:10px;color:var(--muted);text-decoration:none;border:0.5px solid var(--border);padding:6px 12px;border-radius:3px;transition:all 0.2s;letter-spacing:1px}
+.nav-back:hover{border-color:var(--green);color:var(--green)}
+
+.wrap{max-width:1000px;margin:0 auto;padding:32px 28px 60px;position:relative;z-index:1}
+
+/* LOADING */
+.loading{text-align:center;padding:100px 20px}
+.loading-ring{width:60px;height:60px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--green);animation:spin 1s linear infinite;margin:0 auto 20px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.score-wrap{text-align:center;margin-bottom:28px}
-.score-circle{width:130px;height:130px;border-radius:50%;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--green)}
-.sc-warn{border-color:var(--yellow)}.sc-bad{border-color:var(--red)}
-.sc-num{font-size:40px;font-weight:700;font-family:var(--mono);color:#e8f4f8;line-height:1}
-.sc-lbl{font-size:11px;font-family:var(--mono);color:var(--muted)}
-.grade{font-size:20px;font-weight:700;font-family:var(--mono)}
-.g-ok{color:var(--green)}.g-w{color:var(--yellow)}.g-b{color:var(--red)}
-.meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px}
-.stat{background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:12px;text-align:center}
-.sn{font-size:22px;font-weight:700;font-family:var(--mono)}
-.sl{font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:3px}
-.cn{color:var(--red)}.cy{color:var(--yellow)}.cg{color:var(--green)}.cb{color:var(--blue)}
-.sysinfo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
-.si{background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:12px}
-.sil{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
-.siv{font-family:var(--mono);font-size:13px;color:var(--text);word-break:break-all}
-.sec{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:2px;padding-bottom:8px;border-bottom:0.5px solid var(--border);margin:22px 0 10px}
-.finding{display:flex;gap:12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:13px;margin-bottom:7px;align-items:flex-start}
-.finding.crit{border-left:3px solid var(--red)}.finding.warn{border-left:3px solid var(--yellow)}.finding.safe{border-left:3px solid var(--green)}.finding.info{border-left:3px solid var(--blue)}
-.fi{font-size:15px;flex-shrink:0}
-.fb{flex:1}
-.fn{font-size:15px;font-weight:600;color:#e8f4f8;margin-bottom:2px}
-.fd{font-size:12px;color:var(--muted);font-family:var(--mono);line-height:1.5}
-.frec{font-size:12px;color:var(--green);font-family:var(--mono);margin-top:3px}
-.fbadge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;flex-shrink:0}
-.bc{background:#2d0808;color:var(--red)}.bw{background:#2d1e00;color:var(--yellow)}.bs{background:#0a2010;color:var(--green)}.bi{background:#0d1e2d;color:var(--blue)}
-table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono);margin-bottom:18px}
-th{text-align:left;color:var(--muted);padding:8px;border-bottom:0.5px solid var(--border);font-size:10px;letter-spacing:1px}
-td{padding:8px;border-bottom:0.5px solid #0f1623;color:var(--text)}
-.danger{color:var(--red)}.ok-c{color:var(--green)}
-.back-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;margin-bottom:22px;transition:color 0.2s}
-.back-btn:hover{color:var(--green)}
-.share-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:14px;display:flex;align-items:center;gap:10px;margin-bottom:22px}
-.share-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px}
-.share-url{font-family:var(--mono);font-size:12px;color:var(--green);flex:1;word-break:break-all}
-.cpbtn{font-family:var(--mono);font-size:10px;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:4px;cursor:pointer}
-.cpbtn:hover{border-color:var(--green);color:var(--green)}
-.err{text-align:center;padding:60px;font-family:var(--mono);color:var(--red)}
+.loading-text{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:2px}
+
+/* ERROR */
+.error-box{text-align:center;padding:80px 20px}
+.error-code{font-family:var(--display);font-size:60px;color:var(--border2);margin-bottom:12px}
+.error-msg{font-family:var(--mono);font-size:13px;color:var(--muted);margin-bottom:24px}
+.error-link{font-family:var(--mono);font-size:12px;color:var(--green);text-decoration:none;border:0.5px solid var(--green);padding:10px 20px;border-radius:4px;display:inline-block;transition:all 0.2s}
+.error-link:hover{background:var(--green);color:#060a0f}
+
+/* REPORT HEADER */
+.report-header{margin-bottom:32px;animation:fadeUp 0.5s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.report-meta{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.meta-tag{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;padding:3px 8px;border:0.5px solid var(--border);border-radius:3px}
+.meta-tag.active{border-color:var(--green);color:var(--green)}
+.report-id-display{font-family:var(--display);font-size:11px;color:var(--muted);letter-spacing:3px}
+
+/* SHARE BAR */
+.share-bar{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:28px;animation:fadeUp 0.5s ease 0.1s both}
+.share-icon{font-size:16px;flex-shrink:0}
+.share-body{flex:1}
+.share-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px}
+.share-url{font-family:var(--mono);font-size:12px;color:var(--green);word-break:break-all}
+.share-btn{font-family:var(--mono);font-size:10px;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:4px;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0}
+.share-btn:hover{border-color:var(--green);color:var(--green)}
+
+/* SCORE SECTION */
+.score-section{display:grid;grid-template-columns:auto 1fr;gap:28px;background:linear-gradient(145deg,var(--bg2),var(--bg4));border:0.5px solid var(--border2);border-radius:16px;padding:28px;margin-bottom:20px;position:relative;overflow:hidden;animation:fadeUp 0.5s ease 0.15s both}
+.score-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.score-left{display:flex;flex-direction:column;align-items:center;gap:10px}
+.score-ring{position:relative;width:140px;height:140px}
+.score-ring svg{transform:rotate(-90deg)}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num{font-family:var(--display);font-size:40px;font-weight:900;line-height:1}
+.score-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:2px}
+.score-right{display:flex;flex-direction:column;justify-content:center}
+.grade-label{font-family:var(--display);font-size:32px;font-weight:900;margin-bottom:6px;letter-spacing:2px}
+.grade-desc{font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.stat-pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.pill{display:flex;flex-direction:column;align-items:center;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:10px 16px;min-width:70px}
+.pill-n{font-family:var(--display);font-size:22px;font-weight:700;line-height:1}
+.pill-l{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:3px}
+.pill-c{color:var(--red)}.pill-w{color:var(--yellow)}.pill-s{color:var(--green)}.pill-t{color:var(--blue)}
+.scan-type-badge{font-family:var(--mono);font-size:10px;display:inline-flex;align-items:center;gap:6px;color:var(--muted);border:0.5px solid var(--border);padding:5px 10px;border-radius:20px}
+.type-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* SYS INFO */
+.sys-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;animation:fadeUp 0.5s ease 0.2s both}
+.sys-cell{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:14px}
+.sys-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:5px}
+.sys-val{font-family:var(--mono);font-size:13px;color:var(--text);word-break:break-all}
+
+/* FINDINGS */
+.findings-section{animation:fadeUp 0.5s ease 0.25s both}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+.section-title{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:3px}
+.section-count{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.findings-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+
+.finding{display:grid;grid-template-columns:auto 1fr auto;gap:14px;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:16px;align-items:start;transition:border-color 0.2s;position:relative;overflow:hidden}
+.finding::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.finding.crit::before{background:var(--red)}
+.finding.warn::before{background:var(--yellow)}
+.finding.safe::before{background:var(--green)}
+.finding.info::before{background:var(--blue)}
+.finding:hover{border-color:var(--border2)}
+.f-icon-wrap{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.finding.crit .f-icon-wrap{background:var(--red2)}
+.finding.warn .f-icon-wrap{background:var(--yellow2)}
+.finding.safe .f-icon-wrap{background:var(--green3)}
+.finding.info .f-icon-wrap{background:var(--blue2)}
+.f-content{flex:1}
+.f-name{font-size:15px;font-weight:700;color:var(--bright);margin-bottom:4px}
+.f-detail{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6}
+.f-rec{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:6px;padding-top:6px;border-top:0.5px solid var(--border)}
+.f-rec::before{content:'→ FIX: ';color:var(--green2)}
+.f-badge{font-family:var(--mono);font-size:9px;padding:4px 9px;border-radius:4px;align-self:flex-start;white-space:nowrap;letter-spacing:1px}
+.badge-crit{background:var(--red2);color:var(--red);border:0.5px solid rgba(255,71,87,0.2)}
+.badge-warn{background:var(--yellow2);color:var(--yellow);border:0.5px solid rgba(255,211,42,0.15)}
+.badge-safe{background:var(--green3);color:var(--green);border:0.5px solid rgba(0,255,157,0.15)}
+.badge-info{background:var(--blue2);color:var(--blue);border:0.5px solid rgba(79,195,247,0.15)}
+
+/* TABLES */
+.table-section{animation:fadeUp 0.5s ease 0.3s both;margin-bottom:24px}
+.data-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.data-table th{text-align:left;color:var(--muted);padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:10px;letter-spacing:1px;font-weight:400}
+.data-table td{padding:10px 12px;border-bottom:0.5px solid rgba(26,42,58,0.5);color:var(--text);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(12,18,25,0.5)}
+.port-danger{color:var(--red)}.port-safe{color:var(--green)}
+.conn-sus{color:var(--red)}.conn-ok{color:var(--green)}
+.table-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;overflow:hidden}
+
+/* RECOMMENDATIONS */
+.rec-section{background:linear-gradient(145deg,var(--bg2),var(--bg4));border:0.5px solid var(--border2);border-radius:16px;padding:24px;margin-bottom:24px;animation:fadeUp 0.5s ease 0.35s both;position:relative;overflow:hidden}
+.rec-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.rec-title{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:3px;margin-bottom:16px}
+.rec-list{display:flex;flex-direction:column;gap:10px}
+.rec-item{display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:8px;border:0.5px solid var(--border)}
+.rec-num{font-family:var(--display);font-size:11px;color:var(--green);opacity:0.4;min-width:24px;margin-top:1px}
+.rec-body{flex:1}
+.rec-name{font-size:14px;font-weight:600;color:var(--bright);margin-bottom:2px}
+.rec-desc{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5}
+
+/* ACTION BAR */
+.action-bar{display:flex;gap:10px;margin-bottom:24px;animation:fadeUp 0.5s ease 0.4s both;flex-wrap:wrap}
+.action-btn{flex:1;min-width:140px;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:12px 16px;font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:8px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:1px;text-decoration:none}
+.action-btn:hover{border-color:var(--green);color:var(--green)}
+.action-btn.primary{background:var(--green);color:#060a0f;border-color:var(--green);font-weight:700}
+.action-btn.primary:hover{background:var(--green2)}
+
+/* MOBILE */
+@media(max-width:680px){
+  .score-section{grid-template-columns:1fr;text-align:center}
+  .score-left{align-items:center}
+  .stat-pills{justify-content:center}
+  .sys-grid{grid-template-columns:1fr 1fr}
+  .action-bar{flex-direction:column}
+  .share-bar{flex-direction:column;align-items:flex-start}
+}
 </style>
 </head>
 <body>
+
 <nav>
-  <a href="/" class="logo">SHIELD<span>SCAN</span></a>
-  <span style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="navId">LOADING...</span>
-</nav>
-<div class="wrap">
-  <div id="content"><div class="loading"><div class="spin">⟳</div><br>Loading report...</div></div>
-</div>
-<script>
-const sid=window.location.pathname.split('/').pop().toUpperCase();
-document.getElementById('navId').textContent='REPORT #'+sid;
-fetch('/api/report/'+sid).then(r=>{if(!r.ok)throw new Error('not found');return r.json();}).then(render).catch(()=>{
-  document.getElementById('content').innerHTML='<div class="err">Report not found.<br><br><a href="/" style="color:var(--green);font-family:var(--mono)">← Run a new scan</a></div>';
-});
-function render(d){
-  const s=d.score||0;
-  const crits=(d.findings||[]).filter(f=>f.severity==='Critical').length;
-  const warns=(d.findings||[]).filter(f=>f.severity==='Warning').length;
-  const safes=(d.findings||[]).filter(f=>f.severity==='Safe').length;
-  let grade,gc,cc;
-  if(s>=80){grade='SECURE';gc='g-ok';cc='';}else if(s>=55){grade='AT RISK';gc='g-w';cc='sc-warn';}else{grade='VULNERABLE';gc='g-b';cc='sc-bad';}
-  const sys=d.system_info||{};
-  const url=window.location.href;
-  let html=`
-  <a href="/" class="back-btn">← BACK TO SCANNER</a>
-  <div class="share-box"><div><div class="share-label">SHARE THIS REPORT</div><div class="share-url">${url}</div></div><button class="cpbtn" onclick="navigator.clipboard.writeText('${url}');this.textContent='✓ COPIED'">COPY LINK</button></div>
-  <div class="score-wrap">
-    <div class="score-circle ${cc}"><div class="sc-num">${s}</div><div class="sc-lbl">SECURITY SCORE</div></div>
-    <div class="grade ${gc}">${grade}</div>
-    <div class="meta">Report #${d.id} &bull; ${d.scan_type==='agent'?'Deep Agent Scan':'Browser Scan'} &bull; ${new Date(d.created_at).toLocaleString()}</div>
+  <div class="nav-inner">
+    <a href="/" class="logo">SHIELD<span>SCAN</span></a>
+    <div class="nav-right">
+      <span class="nav-id" id="navId">LOADING...</span>
+      <a href="/" class="nav-back">← NEW SCAN</a>
+    </div>
   </div>
-  <div class="stats">
-    <div class="stat"><div class="sn cn">${crits}</div><div class="sl">CRITICAL</div></div>
-    <div class="stat"><div class="sn cy">${warns}</div><div class="sl">WARNINGS</div></div>
-    <div class="stat"><div class="sn cg">${safes}</div><div class="sl">PASSED</div></div>
-    <div class="stat"><div class="sn cb">${(d.findings||[]).length}</div><div class="sl">TOTAL CHECKS</div></div>
-  </div>`;
-  if(sys.os){html+=`<div class="sysinfo">
-    <div class="si"><div class="sil">OS</div><div class="siv">${sys.os}</div></div>
-    <div class="si"><div class="sil">HOSTNAME</div><div class="siv">${sys.hostname||'—'}</div></div>
-    <div class="si"><div class="sil">LOCAL IP</div><div class="siv">${sys.local_ip||'—'}</div></div>
-    <div class="si"><div class="sil">CPU CORES</div><div class="siv">${sys.cpu_count||'—'}</div></div>
-    <div class="si"><div class="sil">RAM</div><div class="siv">${sys.ram_gb||'—'} GB</div></div>
-    <div class="si"><div class="sil">SCAN TIME</div><div class="siv">${sys.scan_time||'—'}</div></div>
-  </div>`;}
-  const sevs=[['Critical','CRITICAL FINDINGS','crit','bc','⚠'],['Warning','WARNINGS','warn','bw','◈'],['Safe','PASSED CHECKS','safe','bs','✓'],['Info','INFORMATION','info','bi','ℹ']];
-  sevs.forEach(([sev,title,cls,badge,icon])=>{
-    const items=(d.findings||[]).filter(f=>f.severity===sev);
-    if(!items.length)return;
-    html+=`<div class="sec">// ${title} (${items.length})</div>`;
-    items.forEach(f=>{html+=`<div class="finding ${cls}"><div class="fi">${icon}</div><div class="fb"><div class="fn">${f.name}</div><div class="fd">${f.detail}</div>${f.recommendation?`<div class="frec">→ ${f.recommendation}</div>`:''}</div><div class="fbadge ${badge}">${sev.toUpperCase()}</div></div>`;});
+</nav>
+
+<div class="wrap" id="mainWrap">
+  <div class="loading" id="loadingEl">
+    <div class="loading-ring"></div>
+    <div class="loading-text">LOADING REPORT...</div>
+  </div>
+</div>
+
+<script>
+const sid = window.location.pathname.split('/').pop().toUpperCase();
+document.getElementById('navId').textContent = 'REPORT #' + sid;
+document.title = 'ShieldScan — Report #' + sid;
+
+fetch('/api/report/' + sid)
+  .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
+  .then(render)
+  .catch(() => {
+    document.getElementById('mainWrap').innerHTML = `
+      <div class="error-box">
+        <div class="error-code">404</div>
+        <div class="error-msg">Report <strong style="color:var(--text)">#${sid}</strong> not found.<br>It may have expired or the ID is incorrect.</div>
+        <a href="/" class="error-link">← RUN A NEW SCAN</a>
+      </div>
+    `;
   });
-  if(d.open_ports&&d.open_ports.length){html+=`<div class="sec">// OPEN PORTS</div><table><thead><tr><th>PORT</th><th>PROCESS</th><th>STATUS</th></tr></thead><tbody>`;d.open_ports.forEach(p=>{html+=`<tr><td class="${p.dangerous?'danger':'ok-c'}">${p.port}</td><td>${p.process}</td><td class="${p.dangerous?'danger':'ok-c'}">${p.dangerous?'⚠ DANGEROUS':'✓ SAFE'}</td></tr>`;});html+=`</tbody></table>`;}
-  if(d.connections&&d.connections.length){html+=`<div class="sec">// ACTIVE CONNECTIONS</div><table><thead><tr><th>REMOTE</th><th>PROCESS</th><th>STATUS</th></tr></thead><tbody>`;d.connections.forEach(c=>{html+=`<tr><td>${c.remote}</td><td>${c.process}</td><td class="${c.suspicious?'danger':'ok-c'}">${c.suspicious?'⚠ SUSPICIOUS':'✓ OK'}</td></tr>`;});html+=`</tbody></table>`;}
-  document.getElementById('content').innerHTML=html;
+
+function render(d) {
+  const s = d.score || 0;
+  const findings = d.findings || [];
+  const crits = findings.filter(f => f.severity === 'Critical').length;
+  const warns = findings.filter(f => f.severity === 'Warning').length;
+  const safes = findings.filter(f => f.severity === 'Safe').length;
+  const infos = findings.filter(f => f.severity === 'Info').length;
+  const ports = d.open_ports || [];
+  const conns = d.connections || [];
+  const sys = d.system_info || {};
+  const scanDate = new Date(d.created_at).toLocaleString();
+  const scanType = d.scan_type === 'agent' ? 'Deep Agent Scan' : d.scan_type === 'mobile' ? 'Mobile Scan' : 'Browser Scan';
+  const scanIcon = d.scan_type === 'agent' ? '🖥' : d.scan_type === 'mobile' ? '📱' : '🌐';
+
+  let grade, gc, rc, gradeDesc;
+  if (s >= 80) { grade = 'SECURE'; gc = 'var(--green)'; rc = '#00ff9d'; gradeDesc = 'Your device passed most security checks. Keep your software updated.'; }
+  else if (s >= 55) { grade = 'AT RISK'; gc = 'var(--yellow)'; rc = '#ffd32a'; gradeDesc = 'Several security issues detected. Review findings and apply fixes below.'; }
+  else { grade = 'VULNERABLE'; gc = 'var(--red)'; rc = '#ff4757'; gradeDesc = 'Critical vulnerabilities found. Take immediate action to secure your device.'; }
+
+  // Score ring calc
+  const circ = 2 * Math.PI * 56;
+  const offset = circ * (1 - s / 100);
+
+  // Build recommendations from critical/warning findings
+  const recs = findings
+    .filter(f => (f.severity === 'Critical' || f.severity === 'Warning') && f.recommendation)
+    .slice(0, 5);
+
+  // FINDINGS HTML
+  const icons = { Critical: '⚠', Warning: '◈', Safe: '✓', Info: 'ℹ' };
+  const typeClass = { Critical: 'crit', Warning: 'warn', Safe: 'safe', Info: 'info' };
+  const badgeClass = { Critical: 'badge-crit', Warning: 'badge-warn', Safe: 'badge-safe', Info: 'badge-info' };
+
+  const sortedFindings = [...findings].sort((a, b) => {
+    const o = { Critical: 0, Warning: 1, Safe: 2, Info: 3 };
+    return o[a.severity] - o[b.severity];
+  });
+
+  const findingsHTML = sortedFindings.map(f => `
+    <div class="finding ${typeClass[f.severity]}">
+      <div class="f-icon-wrap">${icons[f.severity]}</div>
+      <div class="f-content">
+        <div class="f-name">${f.name}</div>
+        <div class="f-detail">${f.detail}</div>
+        ${f.recommendation ? `<div class="f-rec">${f.recommendation}</div>` : ''}
+      </div>
+      <div class="f-badge ${badgeClass[f.severity]}">${f.severity.toUpperCase()}</div>
+    </div>
+  `).join('');
+
+  // PORTS TABLE
+  const portsHTML = ports.length ? `
+    <div class="table-section">
+      <div class="section-header">
+        <div class="section-title">// OPEN PORTS</div>
+        <div class="section-count">${ports.length} listening</div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>PORT</th><th>PROCESS</th><th>PID</th><th>RISK</th></tr></thead>
+          <tbody>
+            ${ports.map(p => `
+              <tr>
+                <td class="${p.dangerous ? 'port-danger' : 'port-safe'}">${p.port}</td>
+                <td>${p.process || '—'}</td>
+                <td style="color:var(--muted)">${p.pid || '—'}</td>
+                <td><span class="f-badge ${p.dangerous ? 'badge-crit' : 'badge-safe'}">${p.dangerous ? '⚠ DANGEROUS' : '✓ SAFE'}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ` : '';
+
+  // CONNECTIONS TABLE
+  const connsHTML = conns.length ? `
+    <div class="table-section">
+      <div class="section-header">
+        <div class="section-title">// ACTIVE CONNECTIONS</div>
+        <div class="section-count">${conns.length} established</div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>LOCAL</th><th>REMOTE</th><th>PROCESS</th><th>STATUS</th></tr></thead>
+          <tbody>
+            ${conns.map(c => `
+              <tr>
+                <td style="color:var(--muted)">${c.local || '—'}</td>
+                <td class="${c.suspicious ? 'conn-sus' : ''}">${c.remote || '—'}</td>
+                <td>${c.process || '—'}</td>
+                <td><span class="f-badge ${c.suspicious ? 'badge-crit' : 'badge-safe'}">${c.suspicious ? '⚠ SUSPICIOUS' : '✓ OK'}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ` : '';
+
+  // RECOMMENDATIONS
+  const recsHTML = recs.length ? `
+    <div class="rec-section">
+      <div class="rec-title">// TOP FIXES — DO THESE FIRST</div>
+      <div class="rec-list">
+        ${recs.map((f, i) => `
+          <div class="rec-item">
+            <div class="rec-num">0${i + 1}</div>
+            <div class="rec-body">
+              <div class="rec-name">${f.name}</div>
+              <div class="rec-desc">${f.recommendation}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  // SYS INFO GRID
+  const sysHTML = sys.os ? `
+    <div class="sys-grid">
+      <div class="sys-cell"><div class="sys-lbl">OS</div><div class="sys-val">${sys.os}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">HOSTNAME</div><div class="sys-val">${sys.hostname || '—'}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">LOCAL IP</div><div class="sys-val">${sys.local_ip || '—'}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">CPU CORES</div><div class="sys-val">${sys.cpu_count || '—'}</div></div>
+      <div class="sys-cell"><div class="sys-lbl">RAM</div><div class="sys-val">${sys.ram_gb || '—'} GB</div></div>
+      <div class="sys-cell"><div class="sys-lbl">SCAN TIME</div><div class="sys-val">${sys.scan_time || scanDate}</div></div>
+    </div>
+  ` : '';
+
+  const reportURL = window.location.href;
+
+  document.getElementById('mainWrap').innerHTML = `
+    <!-- HEADER -->
+    <div class="report-header">
+      <div class="report-meta">
+        <span class="meta-tag active">${scanIcon} ${scanType}</span>
+        <span class="meta-tag">${scanDate}</span>
+        <span class="meta-tag">${findings.length} checks</span>
+      </div>
+      <div class="report-id-display">REPORT ID: ${d.id}</div>
+    </div>
+
+    <!-- SHARE BAR -->
+    <div class="share-bar">
+      <div class="share-icon">🔗</div>
+      <div class="share-body">
+        <div class="share-lbl">SHARE THIS REPORT</div>
+        <div class="share-url">${reportURL}</div>
+      </div>
+      <button class="share-btn" id="shareBtn" onclick="copyURL()">COPY LINK</button>
+    </div>
+
+    <!-- SCORE -->
+    <div class="score-section">
+      <div class="score-left">
+        <div class="score-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="56" fill="none" stroke="var(--border)" stroke-width="7"/>
+            <circle cx="70" cy="70" r="56" fill="none" stroke="${rc}" stroke-width="7"
+              stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+              stroke-linecap="round"
+              style="filter:drop-shadow(0 0 8px ${rc});transition:stroke-dashoffset 1s ease"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-num" style="color:${gc}">${s}</div>
+            <div class="score-lbl">/ 100</div>
+          </div>
+        </div>
+        <div class="scan-type-badge"><div class="type-dot"></div>${scanType}</div>
+      </div>
+      <div class="score-right">
+        <div class="grade-label" style="color:${gc}">${grade}</div>
+        <div class="grade-desc">${gradeDesc}</div>
+        <div class="stat-pills">
+          <div class="pill"><div class="pill-n pill-c">${crits}</div><div class="pill-l">CRITICAL</div></div>
+          <div class="pill"><div class="pill-n pill-w">${warns}</div><div class="pill-l">WARNINGS</div></div>
+          <div class="pill"><div class="pill-n pill-s">${safes}</div><div class="pill-l">PASSED</div></div>
+          <div class="pill"><div class="pill-n pill-t">${infos}</div><div class="pill-l">INFO</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEM INFO -->
+    ${sysHTML}
+
+    <!-- ACTION BAR -->
+    <div class="action-bar">
+      <a href="/" class="action-btn">↺ NEW SCAN</a>
+      <button class="action-btn" onclick="window.print()">🖨 PRINT REPORT</button>
+      <button class="action-btn" onclick="copyURL()">🔗 COPY LINK</button>
+      <a href="/mobile" class="action-btn">📱 MOBILE SCAN</a>
+      <a href="/" class="action-btn primary">⬇ DOWNLOAD AGENT</a>
+    </div>
+
+    <!-- RECOMMENDATIONS -->
+    ${recsHTML}
+
+    <!-- FINDINGS -->
+    <div class="findings-section">
+      <div class="section-header">
+        <div class="section-title">// ALL FINDINGS</div>
+        <div class="section-count">${findings.length} total checks</div>
+      </div>
+      <div class="findings-list">${findingsHTML}</div>
+    </div>
+
+    <!-- PORTS & CONNECTIONS -->
+    ${portsHTML}
+    ${connsHTML}
+  `;
+}
+
+function copyURL() {
+  navigator.clipboard.writeText(window.location.href);
+  const btn = document.getElementById('shareBtn');
+  if (btn) { btn.textContent = '✓ COPIED!'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)'; setTimeout(() => { btn.textContent = 'COPY LINK'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000); }
 }
 </script>
 </body>
 </html>
- 
