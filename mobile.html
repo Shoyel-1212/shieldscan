@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ShieldScan — Mobile Deep Scan</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a0f;--bg2:#0c1219;--bg3:#0f1825;--border:#1a2a3a;--green:#00ff9d;--green2:#00cc7a;--red:#ff4757;--yellow:#ffd32a;--blue:#4fc3f7;--text:#c8dde8;--muted:#4a6a7a;--bright:#e8f8ff;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;--main:'Rajdhani',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--main);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,157,0.01) 3px,rgba(0,255,157,0.01) 4px),radial-gradient(ellipse at 50% 0%,rgba(0,255,157,0.05),transparent 60%);pointer-events:none;z-index:0}
+
+nav{background:rgba(6,10,15,0.95);border-bottom:0.5px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{font-family:var(--display);font-size:13px;color:var(--green);letter-spacing:2px;text-decoration:none}
+.logo span{color:var(--muted)}
+.nav-back{font-family:var(--mono);font-size:10px;color:var(--muted);text-decoration:none;border:0.5px solid var(--border);padding:5px 10px;border-radius:4px}
+
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px;position:relative;z-index:1}
+
+/* HERO */
+.hero{text-align:center;padding:24px 0 28px}
+.eyebrow{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:4px;margin-bottom:12px;opacity:0.8}
+.hero h1{font-family:var(--display);font-size:28px;font-weight:900;color:var(--bright);line-height:1.15;margin-bottom:10px}
+.hero h1 em{color:var(--green);font-style:normal}
+.hero p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.device-badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:20px;padding:6px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px}
+.device-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* SCAN BTN */
+.scan-btn{width:100%;background:linear-gradient(135deg,var(--green2),var(--green));color:#060a0f;border:none;padding:18px;font-family:var(--display);font-size:12px;letter-spacing:3px;cursor:pointer;border-radius:12px;font-weight:700;transition:all 0.3s;margin-bottom:10px}
+.scan-btn:active{transform:scale(0.98);opacity:0.9}
+.scan-btn:disabled{background:var(--bg3);color:var(--muted);cursor:not-allowed}
+.scan-note{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:1px}
+
+/* PROGRESS */
+.prog-section{display:none;background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.prog-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.prog-lbl{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:2px}
+.prog-pct{font-family:var(--display);font-size:20px;color:var(--green)}
+.prog-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.pitem{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg);border-radius:8px;border:0.5px solid var(--border)}
+.pdot{width:14px;height:14px;border-radius:50%;border:0.5px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px}
+.pdot.run{border-color:var(--green);animation:blink 0.8s infinite;box-shadow:0 0 8px rgba(0,255,157,0.4)}
+.pdot.done{background:var(--green);border-color:var(--green);color:#060a0f}
+.pdot.warn{background:var(--yellow);border-color:var(--yellow);color:#060a0f}
+.pdot.fail{background:var(--red);border-color:var(--red);color:#fff}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.plbl{font-family:var(--mono);font-size:11px;color:var(--muted);flex:1}
+.plbl.on{color:var(--text)}
+.pbar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--green2),var(--green));border-radius:2px;transition:width 0.4s;width:0}
+
+/* RESULTS */
+.results-section{display:none}
+
+.score-card{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:0.5px solid var(--border);border-radius:16px;padding:24px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
+.score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.score-ring{margin:0 auto 14px;position:relative;width:110px;height:110px}
+.score-ring svg{transform:rotate(-90deg)}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num{font-family:var(--display);font-size:32px;font-weight:900;line-height:1}
+.score-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px}
+.grade{font-family:var(--display);font-size:20px;font-weight:700;margin-bottom:6px}
+.grade-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.badges{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:4px}
+.bc{background:rgba(255,71,87,0.12);color:var(--red);border:0.5px solid rgba(255,71,87,0.25)}
+.bw{background:rgba(255,211,42,0.08);color:var(--yellow);border:0.5px solid rgba(255,211,42,0.2)}
+.bs{background:rgba(0,255,157,0.06);color:var(--green);border:0.5px solid rgba(0,255,157,0.15)}
+
+/* DEVICE INFO */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.info-cell{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px}
+.ic-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
+.ic-val{font-family:var(--mono);font-size:12px;color:var(--text);word-break:break-all}
+.ic-val.g{color:var(--green)}.ic-val.r{color:var(--red)}.ic-val.y{color:var(--yellow)}
+
+/* FINDINGS */
+.section-title{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:2px;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--border)}
+.findings{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.finding{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:13px;display:flex;gap:10px;border-left:2px solid transparent}
+.finding.crit{border-left-color:var(--red)}.finding.warn{border-left-color:var(--yellow)}.finding.safe{border-left-color:var(--green)}.finding.info{border-left-color:var(--blue)}
+.f-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.f-body{flex:1}
+.f-name{font-size:14px;font-weight:700;color:var(--bright);margin-bottom:3px}
+.f-detail{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5}
+.f-rec{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:4px}
+.f-badge{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;align-self:flex-start;flex-shrink:0}
+.fbc{background:rgba(255,71,87,0.12);color:var(--red)}.fbw{background:rgba(255,211,42,0.08);color:var(--yellow)}.fbs{background:rgba(0,255,157,0.06);color:var(--green)}.fbi{background:rgba(79,195,247,0.08);color:var(--blue)}
+
+/* REPORT LINK */
+.report-box{background:var(--bg2);border:0.5px solid var(--green);border-radius:10px;padding:14px;margin-bottom:14px}
+.rep-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px}
+.rep-id{font-family:var(--display);font-size:18px;color:var(--green);letter-spacing:4px;margin-bottom:10px}
+.rep-btns{display:flex;gap:8px}
+.rep-copy{flex:1;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:10px;font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:8px;transition:all 0.2s}
+.rep-view{flex:1;background:var(--green);color:#060a0f;border:none;padding:10px;font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:8px;font-weight:700}
+
+.rescan-btn{width:100%;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:14px;font-family:var(--mono);font-size:12px;cursor:pointer;border-radius:10px;transition:all 0.2s;letter-spacing:1px}
+.rescan-btn:active{border-color:var(--green);color:var(--green)}
+
+/* PERMISSION PROMPT */
+.perm-card{background:var(--bg2);border:0.5px solid var(--yellow);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
+.perm-title{font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:2px;margin-bottom:8px}
+.perm-text{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.perm-btns{display:flex;gap:8px}
+.perm-allow{flex:1;background:var(--yellow);color:#060a0f;border:none;padding:10px;font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:6px;font-weight:700}
+.perm-skip{flex:1;background:transparent;border:0.5px solid var(--border);color:var(--muted);padding:10px;font-family:var(--mono);font-size:11px;cursor:pointer;border-radius:6px}
+
+footer{text-align:center;padding:20px;font-family:var(--mono);font-size:10px;color:var(--muted);position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">SHIELD<span>SCAN</span></a>
+  <a href="/" class="nav-back">← HOME</a>
+</nav>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">// MOBILE DEEP SCAN</div>
+    <h1>Scan your<br><em>phone</em> now</h1>
+    <p>Full mobile security scan — no app download, no CMD needed. Runs directly in your browser.</p>
+    <div class="device-badge">
+      <div class="device-dot"></div>
+      <span id="deviceName">Detecting device...</span>
+    </div>
+  </div>
+
+  <!-- PERMISSION CARD -->
+  <div class="perm-card" id="permCard">
+    <div class="perm-title">⚠ OPTIONAL PERMISSION</div>
+    <div class="perm-text">For a deeper scan, we can check if your GPS location is being exposed. This is optional — tap Skip to scan without it.</div>
+    <div class="perm-btns">
+      <button class="perm-allow" onclick="allowLocation()">ALLOW LOCATION</button>
+      <button class="perm-skip" onclick="skipLocation()">SKIP</button>
+    </div>
+  </div>
+
+  <!-- SCAN BUTTON -->
+  <div id="startSection">
+    <button class="scan-btn" id="scanBtn" onclick="startMobileScan()">[ SCAN MY PHONE ]</button>
+    <div class="scan-note">No data sent to servers &bull; 100% private &bull; Works on all phones</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="prog-section" id="progSection">
+    <div class="prog-hdr">
+      <div class="prog-lbl">// SCANNING DEVICE</div>
+      <div class="prog-pct" id="pct">0%</div>
+    </div>
+    <div class="prog-list" id="progList"></div>
+    <div class="pbar"><div class="pfill" id="pFill"></div></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-section" id="resultsSection">
+
+    <div class="score-card">
+      <div class="score-ring">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="var(--border)" stroke-width="6"/>
+          <circle id="scoreArc" cx="55" cy="55" r="46" fill="none" stroke="#00ff9d" stroke-width="6" stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round"/>
+        </svg>
+        <div class="score-center">
+          <div class="score-num" id="scoreNum">--</div>
+          <div class="score-lbl">SCORE</div>
+        </div>
+      </div>
+      <div class="grade" id="gradeEl">SCANNING...</div>
+      <div class="grade-sub" id="gradeSub"></div>
+      <div class="badges" id="badgesEl"></div>
+    </div>
+
+    <!-- DEVICE INFO GRID -->
+    <div class="info-grid" id="infoGrid"></div>
+
+    <!-- FINDINGS -->
+    <div class="section-title">// FINDINGS</div>
+    <div class="findings" id="findingsEl"></div>
+
+    <!-- REPORT LINK -->
+    <div class="report-box" id="reportBox" style="display:none">
+      <div class="rep-lbl">YOUR REPORT ID</div>
+      <div class="rep-id" id="repId">----</div>
+      <div class="rep-btns">
+        <button class="rep-copy" id="repCopy" onclick="copyRepId()">COPY ID</button>
+        <button class="rep-view" onclick="viewReport()">VIEW REPORT</button>
+      </div>
+    </div>
+
+    <button class="rescan-btn" onclick="resetScan()">↺ SCAN AGAIN</button>
+  </div>
+</div>
+
+<footer>ShieldScan Mobile &bull; Educational use only &bull; Scan only your own device</footer>
+
+<script>
+const SERVER = window.location.origin;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+let findings = [], score = 100, locationData = null, locationSkipped = false;
+
+const STEPS = [
+  ["Detecting device info", "📱"],
+  ["Checking IP & location", "🌐"],
+  ["WebRTC leak test", "📡"],
+  ["Camera & Mic access", "📷"],
+  ["GPS exposure check", "📍"],
+  ["Network type detection", "📶"],
+  ["Browser security scan", "🔒"],
+  ["Battery & performance", "🔋"],
+  ["Tracking & fingerprint", "👆"],
+  ["Saving report", "💾"],
+];
+
+// ── DEVICE DETECTION ──────────────────────────
+function getDevice() {
+  const ua = navigator.userAgent;
+  if (/iPhone/.test(ua)) return '📱 iPhone';
+  if (/iPad/.test(ua)) return '📱 iPad';
+  if (/Android/.test(ua)) {
+    const m = ua.match(/Android.*?;\s*([^)]+)\)/);
+    return '📱 ' + (m ? m[1].trim() : 'Android');
+  }
+  return '💻 ' + navigator.platform;
+}
+
+function getOS() {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad/.test(ua)) { const m = ua.match(/OS ([\d_]+)/); return 'iOS ' + (m ? m[1].replace(/_/g, '.') : ''); }
+  if (/Android/.test(ua)) { const m = ua.match(/Android ([\d.]+)/); return 'Android ' + (m ? m[1] : ''); }
+  if (/Windows/.test(ua)) return 'Windows';
+  if (/Mac/.test(ua)) return 'macOS';
+  return 'Unknown OS';
+}
+
+function getBrowser() {
+  const ua = navigator.userAgent;
+  if (/EdgA|EdgiOS/.test(ua)) return 'Edge Mobile';
+  if (/Chrome/.test(ua) && /Mobile/.test(ua)) return 'Chrome Mobile';
+  if (/Firefox/.test(ua)) return 'Firefox';
+  if (/Safari/.test(ua) && !/Chrome/.test(ua)) return 'Safari';
+  if (/Samsung/.test(ua)) return 'Samsung Browser';
+  return 'Unknown';
+}
+
+// ── PERMISSION FLOW ──────────────────────────
+let locResolve = null;
+
+function askLocation() {
+  return new Promise(res => {
+    locResolve = res;
+    document.getElementById('permCard').style.display = 'block';
+  });
+}
+
+function allowLocation() {
+  document.getElementById('permCard').style.display = 'none';
+  navigator.geolocation.getCurrentPosition(
+    pos => { locationData = pos.coords; locResolve(true); },
+    () => { locResolve(false); },
+    { timeout: 8000 }
+  );
+}
+
+function skipLocation() {
+  locationSkipped = true;
+  document.getElementById('permCard').style.display = 'none';
+  locResolve(false);
+}
+
+// ── SCAN STEPS ──────────────────────────────
+function addF(type, name, detail, rec = '') {
+  findings.push({ type, name, detail, rec, severity: type === 'critical' ? 'Critical' : type === 'warning' ? 'Warning' : type === 'safe' ? 'Safe' : 'Info' });
+}
+
+async function stepDeviceInfo() {
+  const isMobile = /Mobi|Android|iPhone|iPad/.test(navigator.userAgent);
+  addF('info', 'Device Detected', `${getDevice()} running ${getOS()} — Browser: ${getBrowser()}`, '');
+  if (!isMobile) addF('warning', 'Not a Mobile Device', 'This scan is optimised for phones. Some checks may not apply on desktop.', 'Use a phone for full mobile scan results.');
+}
+
+async function stepIP() {
+  try {
+    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
+    const d = await r.json();
+    window._ipData = d;
+    const kw = ['vpn', 'proxy', 'hosting', 'datacenter', 'cloud'];
+    const isVPN = d.org && kw.some(k => d.org.toLowerCase().includes(k));
+    addF('info', 'Public IP', `IP: ${d.ip} — ${d.org || 'Unknown'} — ${d.city || ''}, ${d.country_name || ''}`, '');
+    if (!isVPN) { score -= 3; addF('warning', 'No VPN Detected', `Direct ISP connection: ${d.org}. Your traffic is not encrypted by a VPN.`, 'Use a trusted VPN especially on public WiFi.'); }
+    else addF('safe', 'VPN Active', `Traffic routes through: ${d.org}. IP is masked.`, '');
+  } catch { addF('info', 'IP Detection', 'Could not fetch public IP.', ''); }
+}
+
+async function stepWebRTC() {
+  return new Promise(res => {
+    let ips = [];
+    try {
+      const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      pc.createDataChannel(''); pc.createOffer().then(o => pc.setLocalDescription(o));
+      pc.onicecandidate = e => {
+        if (!e || !e.candidate) {
+          pc.close();
+          if (ips.length) { score -= 20; addF('critical', 'WebRTC IP Leak', `Local IP exposed: ${ips.join(', ')} — This reveals your real network even on VPN.`, 'Use Firefox or Brave which block WebRTC leaks by default.'); }
+          else addF('safe', 'WebRTC Protected', 'No local IP leak via WebRTC. Your network address is hidden.', '');
+          res(); return;
+        }
+        const m = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);
+        if (m && !ips.includes(m[1])) ips.push(m[1]);
+      };
+      setTimeout(() => { pc.close(); res(); }, 2500);
+    } catch { res(); }
+  });
+}
+
+async function stepCameraMic() {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    score -= 5;
+    addF('warning', 'Camera & Mic API Accessible', 'Your browser exposes camera and microphone APIs. Any website can request access.', 'Only grant camera/mic permission to apps you fully trust. Revoke unused permissions in phone Settings.');
+  } else {
+    addF('safe', 'Media Access Restricted', 'Camera and microphone APIs are not accessible.', '');
+  }
+
+  // Check existing permissions
+  if (navigator.permissions) {
+    try {
+      const cam = await navigator.permissions.query({ name: 'camera' });
+      if (cam.state === 'granted') { score -= 10; addF('critical', 'Camera Permission Already Granted', 'A website or app has camera access on this browser. Check which site has permission.', 'Go to browser Settings → Site Permissions → Camera and revoke untrusted sites.'); }
+      const mic = await navigator.permissions.query({ name: 'microphone' });
+      if (mic.state === 'granted') { score -= 10; addF('critical', 'Microphone Permission Already Granted', 'A website or app has microphone access on this browser.', 'Go to browser Settings → Site Permissions → Microphone and revoke untrusted sites.'); }
+    } catch { }
+  }
+}
+
+async function stepGPS() {
+  const granted = await askLocation();
+  if (locationData) {
+    score -= 8;
+    addF('critical', 'Precise Location Exposed', `GPS coordinates obtained: ${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)} — Accuracy: ${Math.round(locationData.accuracy)}m. Your exact location was accessible.`, 'Deny location access to browser. Go to phone Settings → Privacy → Location → Browser → Deny.');
+  } else if (!locationSkipped) {
+    addF('safe', 'Location Access Denied', 'GPS location was requested and denied. Your precise location is protected.', '');
+  } else {
+    addF('info', 'Location Check Skipped', 'You chose to skip the GPS exposure check.', '');
+  }
+
+  // Check location permission state
+  if (navigator.permissions) {
+    try {
+      const loc = await navigator.permissions.query({ name: 'geolocation' });
+      if (loc.state === 'granted') { score -= 5; addF('warning', 'Location Always Permitted', 'Browser has standing location permission. Sites can request GPS without prompting.', 'Revoke in phone Settings → Apps → Browser → Permissions → Location.'); }
+    } catch { }
+  }
+}
+
+async function stepNetwork() {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn) {
+    const type = conn.effectiveType || conn.type || 'unknown';
+    const isPublicWifi = type === 'wifi' || type === '4g';
+    if (conn.type === 'wifi') {
+      score -= 5;
+      addF('warning', 'Connected to WiFi', `Network: WiFi (${conn.effectiveType || 'unknown speed'}). Public WiFi networks can be monitored by attackers.`, 'Avoid public WiFi without a VPN. Use mobile data for sensitive activities.');
+    } else {
+      addF('safe', `Mobile Data (${type.toUpperCase()})`, 'Using cellular data. More secure than public WiFi for browsing.', '');
+    }
+    addF('info', 'Network Speed', `Effective type: ${conn.effectiveType || 'unknown'} — Downlink: ${conn.downlink || '?'} Mbps — RTT: ${conn.rtt || '?'}ms`, '');
+  } else {
+    addF('info', 'Network Info', 'Network Information API not available in this browser.', '');
+  }
+}
+
+async function stepBrowser() {
+  const ua = navigator.userAgent;
+  const isHTTPS = location.protocol === 'https:';
+  const doNotTrack = navigator.doNotTrack === '1';
+  const cookiesOn = navigator.cookieEnabled;
+
+  if (!isHTTPS) { score -= 15; addF('critical', 'No HTTPS', 'Connection is unencrypted. Traffic can be intercepted.', 'Only use HTTPS websites. Look for the padlock icon.'); }
+  else addF('safe', 'HTTPS Active', 'Connection is encrypted with TLS/HTTPS.', '');
+
+  if (!doNotTrack) { score -= 8; addF('warning', 'Tracking Not Blocked', 'Do Not Track is off. Ad networks can profile your mobile browsing.', 'Enable DNT in browser settings. Consider using Brave or Firefox.'); }
+  else addF('safe', 'Do Not Track Active', 'DNT signal is enabled.', '');
+
+  // Check for outdated browser
+  const isChrome = /Chrome\/(\d+)/.exec(ua);
+  const isSafari = /Version\/(\d+).*Safari/.exec(ua);
+  if (isChrome && parseInt(isChrome[1]) < 110) { score -= 10; addF('critical', 'Outdated Browser', `Chrome version ${isChrome[1]} detected. Older browsers have known security vulnerabilities.`, 'Update Chrome to the latest version in the Play Store.'); }
+  else if (isSafari && parseInt(isSafari[1]) < 16) { score -= 10; addF('critical', 'Outdated Browser', `Safari version ${isSafari[1]} detected. Update iOS for the latest Safari security patches.`, 'Go to Settings → General → Software Update.'); }
+  else addF('safe', 'Browser Up to Date', 'Browser version appears current. Security patches are likely applied.', '');
+}
+
+async function stepBattery() {
+  if ('getBattery' in navigator) {
+    try {
+      const bat = await navigator.getBattery();
+      const pct = Math.round(bat.level * 100);
+      const charging = bat.charging;
+      addF('info', `Battery: ${pct}% ${charging ? '(Charging)' : ''}`, `Battery level is ${pct}%. ${pct < 20 ? 'Low battery — some security features may be reduced.' : 'Battery level is healthy.'}`, '');
+      // Unusual discharge can indicate background spyware
+      if (!charging && pct < 15) addF('warning', 'Very Low Battery', 'Extremely low battery. Unusual battery drain can sometimes indicate background malware activity.', 'Check Settings → Battery → Battery Usage for unusual app consumption.');
+    } catch { addF('info', 'Battery', 'Battery status not accessible.', ''); }
+  } else {
+    addF('info', 'Battery API', 'Battery status API not available in this browser.', '');
+  }
+}
+
+async function stepFingerprint() {
+  const vectors = [navigator.userAgent, navigator.language, Intl.DateTimeFormat().resolvedOptions().timeZone, `${screen.width}x${screen.height}`, navigator.hardwareConcurrency, navigator.deviceMemory, navigator.plugins?.length, navigator.platform, screen.colorDepth].filter(Boolean).length;
+  if (vectors >= 7) { score -= 10; addF('warning', 'High Mobile Fingerprint', `${vectors}/9 tracking vectors found. Your phone can be identified across sites without cookies.`, 'Use Firefox Focus or Brave browser on mobile for better fingerprint protection.'); }
+  else addF('safe', 'Low Fingerprint Risk', 'Mobile browser fingerprint uniqueness is relatively low.', '');
+
+  // Check for clipboard access
+  if (navigator.clipboard) addF('info', 'Clipboard API Available', 'Websites can request clipboard read/write access. Only paste on sites you trust.', '');
+}
+
+async function saveReport() {
+  try {
+    const r = await fetch(SERVER + '/api/scan/browser', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ score: Math.max(0, score), findings, scan_type: 'mobile' })
+    });
+    const d = await r.json();
+    if (d.scan_id) window._scanId = d.scan_id;
+  } catch { }
+}
+
+// ── MAIN SCAN ────────────────────────────────
+async function startMobileScan() {
+  findings = []; score = 100; locationData = null; locationSkipped = false; window._scanId = null;
+  document.getElementById('scanBtn').disabled = true;
+  document.getElementById('startSection').style.display = 'none';
+  document.getElementById('progSection').style.display = 'block';
+  document.getElementById('resultsSection').style.display = 'none';
+
+  const list = document.getElementById('progList');
+  list.innerHTML = '';
+  STEPS.forEach(([s, ic], i) => {
+    const d = document.createElement('div'); d.className = 'pitem';
+    d.innerHTML = `<div class="pdot" id="pd${i}"></div><span class="plbl" id="pl${i}">${ic} ${s}</span>`;
+    list.appendChild(d);
+  });
+
+  const fns = [stepDeviceInfo, stepIP, stepWebRTC, stepCameraMic, stepGPS, stepNetwork, stepBrowser, stepBattery, stepFingerprint, saveReport];
+
+  for (let i = 0; i < STEPS.length; i++) {
+    document.getElementById(`pd${i}`).className = 'pdot run';
+    document.getElementById(`pl${i}`).className = 'plbl on';
+    const pct = Math.round((i / STEPS.length) * 100);
+    document.getElementById('pFill').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '%';
+    await sleep(300 + Math.random() * 400);
+    await fns[i]();
+    document.getElementById(`pd${i}`).className = 'pdot done';
+    document.getElementById(`pd${i}`).textContent = '✓';
+    document.getElementById(`pl${i}`).className = 'plbl';
+  }
+
+  document.getElementById('pFill').style.width = '100%';
+  document.getElementById('pct').textContent = '100%';
+  await sleep(400);
+  showResults();
+}
+
+function showResults() {
+  document.getElementById('progSection').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+
+  const s = Math.max(0, Math.min(100, score));
+  const crits = findings.filter(f => f.type === 'critical').length;
+  const warns = findings.filter(f => f.type === 'warning').length;
+  const safes = findings.filter(f => f.type === 'safe').length;
+
+  let grade, gc, rc;
+  if (s >= 80) { grade = 'SECURE'; gc = 'var(--green)'; rc = '#00ff9d'; }
+  else if (s >= 55) { grade = 'AT RISK'; gc = 'var(--yellow)'; rc = '#ffd32a'; }
+  else { grade = 'VULNERABLE'; gc = 'var(--red)'; rc = '#ff4757'; }
+
+  // Score ring
+  const circ = 2 * Math.PI * 46;
+  const offset = circ * (1 - s / 100);
+  const arc = document.getElementById('scoreArc');
+  arc.style.stroke = rc;
+  arc.style.filter = `drop-shadow(0 0 6px ${rc})`;
+  arc.setAttribute('stroke-dasharray', circ);
+  arc.setAttribute('stroke-dashoffset', offset);
+
+  document.getElementById('scoreNum').textContent = s;
+  document.getElementById('scoreNum').style.color = gc;
+  document.getElementById('gradeEl').textContent = grade;
+  document.getElementById('gradeEl').style.color = gc;
+  document.getElementById('gradeSub').textContent = `${findings.length} checks completed`;
+  document.getElementById('badgesEl').innerHTML = `
+    <span class="badge bc">⚠ ${crits} CRITICAL</span>
+    <span class="badge bw">◈ ${warns} WARNINGS</span>
+    <span class="badge bs">✓ ${safes} PASSED</span>
+  `;
+
+  // Device info grid
+  const ip = window._ipData || {};
+  document.getElementById('infoGrid').innerHTML = `
+    <div class="info-cell"><div class="ic-lbl">DEVICE</div><div class="ic-val">${getDevice()}</div></div>
+    <div class="info-cell"><div class="ic-lbl">OS</div><div class="ic-val">${getOS()}</div></div>
+    <div class="info-cell"><div class="ic-lbl">BROWSER</div><div class="ic-val">${getBrowser()}</div></div>
+    <div class="info-cell"><div class="ic-lbl">PUBLIC IP</div><div class="ic-val g">${ip.ip || '—'}</div></div>
+    <div class="info-cell"><div class="ic-lbl">LOCATION</div><div class="ic-val">${ip.city || '—'}, ${ip.country_name || '—'}</div></div>
+    <div class="info-cell"><div class="ic-lbl">PROTOCOL</div><div class="ic-val ${location.protocol === 'https:' ? 'g' : 'r'}">${location.protocol.replace(':', '').toUpperCase()}</div></div>
+  `;
+
+  // Findings
+  const icons = { critical: '⚠', warning: '◈', safe: '✓', info: 'ℹ' };
+  const bc = { critical: 'fbc', warning: 'fbw', safe: 'fbs', info: 'fbi' };
+  const bl = { critical: 'CRITICAL', warning: 'WARNING', safe: 'SAFE', info: 'INFO' };
+  const sorted = [...findings].sort((a, b) => ({ critical: 0, warning: 1, safe: 2, info: 3 }[a.type] - ({ critical: 0, warning: 1, safe: 2, info: 3 }[b.type])));
+  document.getElementById('findingsEl').innerHTML = sorted.map(f => `
+    <div class="finding ${f.type}">
+      <div class="f-icon">${icons[f.type]}</div>
+      <div class="f-body">
+        <div class="f-name">${f.name}</div>
+        <div class="f-detail">${f.detail}</div>
+        ${f.rec ? `<div class="f-rec">→ ${f.rec}</div>` : ''}
+      </div>
+      <div class="f-badge ${bc[f.type]}">${bl[f.type]}</div>
+    </div>
+  `).join('');
+
+  // Report link
+  if (window._scanId) {
+    document.getElementById('repId').textContent = window._scanId;
+    document.getElementById('reportBox').style.display = 'block';
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function copyRepId() {
+  navigator.clipboard.writeText(window._scanId || '');
+  document.getElementById('repCopy').textContent = '✓ COPIED';
+}
+function viewReport() { if (window._scanId) window.location.href = '/report/' + window._scanId; }
+function resetScan() {
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('startSection').style.display = 'block';
+  document.getElementById('scanBtn').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Set device name on load
+document.getElementById('deviceName').textContent = getDevice() + ' — ' + getOS();
+</script>
+</body>
+</html>
