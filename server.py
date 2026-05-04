@@ -5,18 +5,18 @@ import os, json, uuid, sqlite3
 from datetime import datetime
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
- 
+
 app = Flask(__name__)
 CORS(app)
- 
+
 DB_FILE = "shieldscan.db"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
- 
+
 def get_db():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
- 
+
 def init_db():
     conn = get_db()
     conn.executescript("""
@@ -36,19 +36,23 @@ def init_db():
     """)
     conn.commit()
     conn.close()
- 
+
 @app.route("/")
 def home():
     return send_file(os.path.join(BASE_DIR, "index.html"))
- 
+
 @app.route("/report/<scan_id>")
 def report_page(scan_id):
     return send_file(os.path.join(BASE_DIR, "report.html"))
- 
+
+@app.route("/mobile")
+def mobile_scan():
+    return send_file(os.path.join(BASE_DIR, "mobile.html"))
+
 @app.route("/download")
 def download_agent():
     return send_file(os.path.join(BASE_DIR, "shieldscan_agent.py"), as_attachment=True, download_name="shieldscan_agent.py")
- 
+
 @app.route("/api/scan", methods=["POST"])
 def submit_scan():
     data = request.get_json()
@@ -67,7 +71,7 @@ def submit_scan():
          json.dumps(data.get("processes",[])), json.dumps(data.get("startup",[])), data.get("scan_type","agent")))
     conn.commit(); conn.close()
     return jsonify({"success": True, "scan_id": scan_id, "report_url": f"/report/{scan_id}"})
- 
+
 @app.route("/api/scan/browser", methods=["POST"])
 def submit_browser_scan():
     data = request.get_json()
@@ -82,7 +86,7 @@ def submit_browser_scan():
         (scan_id, datetime.now().isoformat(), request.remote_addr, data.get("score",0), crits, warns, passed, json.dumps(findings), "browser"))
     conn.commit(); conn.close()
     return jsonify({"success": True, "scan_id": scan_id, "report_url": f"/report/{scan_id}"})
- 
+
 @app.route("/api/report/<scan_id>")
 def get_report(scan_id):
     conn = get_db()
@@ -98,7 +102,7 @@ def get_report(scan_id):
         "connections": json.loads(row["connections"] or "[]"),
         "processes": json.loads(row["processes"] or "[]"),
         "scan_type": row["scan_type"]})
- 
+
 @app.route("/api/stats")
 def get_stats():
     conn = get_db()
@@ -107,12 +111,9 @@ def get_stats():
     crits = conn.execute("SELECT SUM(critical) as c FROM scans").fetchone()["c"]
     conn.close()
     return jsonify({"total_scans": total, "avg_score": round(avg or 0, 1), "total_criticals": crits or 0})
- 
+
 init_db()
- 
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
- 
-    app.run(host="0.0.0.0", port=port, debug=debug)
- 
