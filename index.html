@@ -153,26 +153,36 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
     <div class="nav-right">
       <a href="#tools" class="nav-link">TOOLS</a>
       <a href="#features" class="nav-link">FEATURES</a>
+      <a href="/mobile" class="nav-cta" style="background:transparent;border-color:var(--blue);color:var(--blue)">📱 MOBILE</a>
       <a href="/download" class="nav-cta">⬇ AGENT</a>
     </div>
   </div>
 </nav>
- 
+
 <div class="wrap">
   <div class="hero">
     <div class="eyebrow">// ADVANCED CYBERSECURITY PLATFORM v2.0</div>
     <h1>Is your device<br><em>compromised?</em></h1>
     <p>Browser scan + deep device agent + security tools. Detect spyware, IP leaks, weak passwords, open ports and more — free, instant, private.</p>
   </div>
- 
-  <div class="scan-panel">
-    <div class="panel-hdr"><div class="panel-lbl">// SECURITY SCANNER</div><div class="panel-ver">v2.0</div></div>
+
+  <!-- MOBILE BANNER -->
+  <a href="/mobile" style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(79,195,247,0.06),rgba(79,195,247,0.02));border:0.5px solid rgba(79,195,247,0.2);border-radius:10px;padding:14px 20px;max-width:720px;margin:0 auto 14px;text-decoration:none;transition:border-color 0.2s">
+    <span style="font-size:22px">📱</span>
+    <div style="flex:1">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;margin-bottom:2px">ON YOUR PHONE?</div>
+      <div style="font-size:14px;color:var(--text);font-weight:600">Use Mobile Deep Scan — no app, no CMD needed</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--blue);letter-spacing:1px;white-space:nowrap;border:0.5px solid rgba(79,195,247,0.3);padding:5px 10px;border-radius:4px">SCAN PHONE →</div>
+  </a>
+
+  <div class="scan-panel"><div class="panel-lbl">// SECURITY SCANNER</div><div class="panel-ver">v2.0</div></div>
     <div class="tabs">
       <button class="tab active" onclick="switchTab(0)">🔍 BROWSER SCAN</button>
       <button class="tab" onclick="switchTab(1)">🖥 DEEP SCAN</button>
       <button class="tab" onclick="switchTab(2)">📊 MY REPORT</button>
     </div>
- 
+
     <div class="tc active" id="tc0">
       <div id="bstart">
         <div class="desc-box">Checks: IP exposure · WebRTC leak · DNS security · HTTPS · Browser fingerprint · Camera/Mic API · Tracking scripts · Security headers · VPN detection</div>
@@ -186,7 +196,7 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
       </div>
       <div class="result-card" id="bResult"></div>
     </div>
- 
+
     <div class="tc" id="tc1">
       <div class="dl-area">
         <a href="/download" class="dl-btn">⬇ DOWNLOAD AGENT (Python)</a>
@@ -201,7 +211,7 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
         </div>
       </div>
     </div>
- 
+
     <div class="tc" id="tc2">
       <div style="padding:10px 0 16px">
         <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:14px;text-align:center">ENTER YOUR REPORT ID</div>
@@ -213,13 +223,13 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
       </div>
     </div>
   </div>
- 
+
   <div class="statsbar">
     <div class="statcell"><div class="stn" id="stT">—</div><div class="stl">TOTAL SCANS</div></div>
     <div class="statcell"><div class="stn" id="stA">—</div><div class="stl">AVG SCORE</div></div>
     <div class="statcell"><div class="stn" id="stC">—</div><div class="stl">THREATS FOUND</div></div>
   </div>
- 
+
   <!-- TOOLS -->
   <div id="tools" style="margin-bottom:52px">
     <div class="sec-head">
@@ -237,7 +247,7 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
         <div class="pass-lbl" id="pLbl" style="color:var(--muted)">Enter a password above</div>
         <div class="pass-tips" id="pTips"></div>
       </div>
- 
+
       <div class="tool-box">
         <div class="tool-ttl">🌐 IP REPUTATION LOOKUP</div>
         <div class="tool-row">
@@ -246,7 +256,7 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
         </div>
         <div class="tool-res" id="ipRes"></div>
       </div>
- 
+
       <div class="tool-box">
         <div class="tool-ttl">🔒 SSL CERTIFICATE CHECKER</div>
         <div class="tool-row">
@@ -255,7 +265,7 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
         </div>
         <div class="tool-res" id="sslRes"></div>
       </div>
- 
+
       <div class="tool-box">
         <div class="tool-ttl">📡 DNS LEAK TEST</div>
         <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.7">Tests if your DNS queries leak outside your VPN tunnel, revealing your ISP and browsing activity.</p>
@@ -264,7 +274,7 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
       </div>
     </div>
   </div>
- 
+
   <!-- FEATURES -->
   <div id="features" style="margin-bottom:52px">
     <div class="sec-head">
@@ -281,9 +291,15 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
       <div class="fc"><div class="fc-icon">🌐</div><div class="fc-title">IP REPUTATION</div><div class="fc-desc">Check any IP address for VPN, proxy, hosting or malicious flags.</div><div class="fc-badge">TOOL</div></div>
       <div class="fc"><div class="fc-icon">🔥</div><div class="fc-title">FIREWALL STATUS</div><div class="fc-desc">System firewall active state and profile configuration check.</div><div class="fc-badge">AGENT</div></div>
       <div class="fc"><div class="fc-icon">👆</div><div class="fc-title">BROWSER FINGERPRINT</div><div class="fc-desc">9-vector uniqueness score. How trackable are you without cookies?</div><div class="fc-badge">BROWSER</div></div>
+      <div class="fc" style="border-color:rgba(79,195,247,0.3);background:linear-gradient(145deg,var(--bg2),rgba(79,195,247,0.04))">
+        <div class="fc-icon">📱</div>
+        <div class="fc-title" style="color:var(--blue)">MOBILE DEEP SCAN</div>
+        <div class="fc-desc">Full phone scan — Camera/Mic access, GPS exposure, network type, battery drain, browser security. No app needed.</div>
+        <a href="/mobile" style="display:inline-block;margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--blue);border:0.5px solid rgba(79,195,247,0.3);padding:4px 10px;border-radius:3px;text-decoration:none;letter-spacing:1px">SCAN MY PHONE →</a>
+      </div>
     </div>
   </div>
- 
+
   <div style="margin-bottom:52px">
     <div class="sec-head">
       <div class="sec-eyebrow">// WORKFLOW</div>
@@ -297,26 +313,26 @@ footer{border-top:0.5px solid var(--border);padding:22px 0;margin-top:16px}
     </div>
   </div>
 </div>
- 
+
 <footer>
   <div class="fi2">
     <div class="fl">SHIELDSCAN v2.0</div>
     <div class="fn2">Educational use only &bull; Scan only your own devices &bull; No data stored</div>
   </div>
 </footer>
- 
+
 <script>
 const SERVER=window.location.origin;
 const STEPS=[["Detecting public IP","🌐"],["WebRTC leak check","📡"],["DNS security","🔍"],["HTTPS check","🔒"],["Browser fingerprint","👆"],["Camera/Mic API","📷"],["Tracking scripts","👁"],["Security headers","🛡"],["VPN detection","🔐"],["Saving report","💾"]];
 let findings=[],score=100,ipData={};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
- 
+
 function switchTab(n){
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',i===n));
   document.querySelectorAll('.tc').forEach((el,i)=>el.classList.toggle('active',i===n));
 }
 function goRep(id){const v=document.getElementById(id).value.trim().toUpperCase();if(v)window.location.href='/report/'+v;}
- 
+
 async function startScan(){
   findings=[];score=100;ipData={};
   document.getElementById('bBtn').disabled=true;
@@ -341,7 +357,7 @@ async function startScan(){
   document.getElementById('bPct').textContent='100%';
   await sleep(300);showResult();
 }
- 
+
 async function doIP(){try{const r=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(4000)});ipData=await r.json();addF('info','Public IP','IP: '+ipData.ip+' — '+ipData.org+' — '+(ipData.city||'')+', '+(ipData.country_name||''),0);}catch{addF('info','IP','Could not detect IP.',0);}}
 async function doWebRTC(){return new Promise(res=>{let ips=[];try{const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});pc.createDataChannel('');pc.createOffer().then(o=>pc.setLocalDescription(o));pc.onicecandidate=e=>{if(!e||!e.candidate){pc.close();if(ips.length){score-=20;addF('critical','WebRTC IP Leak','Local IP exposed: '+ips.join(', ')+' — Bypasses VPN. Reveals real network address to websites.',20);}else addF('safe','WebRTC Protected','No WebRTC leak. Local IP is hidden from websites.',0);res();return;}const m=/([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);if(m&&!ips.includes(m[1]))ips.push(m[1]);};setTimeout(()=>{pc.close();res();},2500);}catch{res();}});}
 async function doDNS(){if(Math.random()>.55){score-=10;addF('warning','DNS Security','DNSSEC not detected. Your ISP can see and potentially manipulate DNS queries.',10);}else addF('safe','DNS Secure','DNS resolver uses secure resolution. Lower spoofing risk.',0);}
@@ -353,7 +369,7 @@ function doHdr(){if(location.protocol!=='https:'){score-=5;addF('warning','Secur
 function doVPN(){if(ipData&&ipData.org){const kw=['vpn','proxy','hosting','datacenter','cloud','digitalocean','linode','aws','azure','ovh','vultr'];const v=kw.some(k=>ipData.org.toLowerCase().includes(k));if(v)addF('info','VPN/Proxy Active','IP ('+ipData.ip+') routes through: '+ipData.org+'. Good for privacy protection.',0);else{score-=3;addF('warning','No VPN Detected','Direct ISP connection detected: '+ipData.org+'. Consider using a VPN on public networks.',3);}}}
 async function saveRep(){try{const r=await fetch(SERVER+'/api/scan/browser',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({score:Math.max(0,score),findings})});const d=await r.json();if(d.scan_id)window._sid=d.scan_id;}catch{}}
 function addF(type,name,detail,loss){findings.push({type,name,detail,severity:type==='critical'?'Critical':type==='warning'?'Warning':type==='safe'?'Safe':'Info'});}
- 
+
 function showResult(){
   document.getElementById('bProg').style.display='none';
   const s=Math.max(0,Math.min(100,score));
@@ -398,7 +414,7 @@ function showResult(){
   `;
 }
 function resetScan(){document.getElementById('bResult').style.display='none';document.getElementById('bstart').style.display='block';document.getElementById('bBtn').disabled=false;window._sid=null;}
- 
+
 // ── TOOLS ────────────────────────────────────
 let pVis=false;
 function togglePass(){pVis=!pVis;document.getElementById('pInp').type=pVis?'text':'password';}
@@ -426,7 +442,7 @@ function checkPass(v){
   tips2.innerHTML=tips.length?'<span style="color:var(--muted)">Improve:</span><br>'+tips.map(t=>`<span style="color:var(--yellow)">${t}</span>`).join('<br>'):'<span style="color:var(--green)">✓ Meets all security criteria!</span>';
   tips2.className='pass-tips show';
 }
- 
+
 async function lookupIP(){
   const ip=document.getElementById('ipInp').value.trim();if(!ip)return;
   const res=document.getElementById('ipRes');
@@ -445,7 +461,7 @@ async function lookupIP(){
     `;
   }catch{res.innerHTML='<span class="tr-val r">Lookup failed. Try again.</span>';}
 }
- 
+
 async function checkSSL(){
   const domain=document.getElementById('sslInp').value.trim().replace(/https?:\/\//,'').split('/')[0];
   if(!domain)return;
@@ -458,7 +474,7 @@ async function checkSSL(){
     <div class="tr-row"><span class="tr-lbl">Quick Check</span><span class="tr-val b"><a href="https://crt.sh/?q=${domain}" target="_blank" style="color:var(--blue)">View Certificates ↗</a></span></div>
   `;
 }
- 
+
 async function dnsLeak(){
   const res=document.getElementById('dnsRes');
   res.innerHTML='<span style="color:var(--muted)">Testing DNS routing...</span>';res.className='tool-res show';
@@ -476,12 +492,12 @@ async function dnsLeak(){
     `;
   }catch{res.innerHTML='<span class="tr-val r">Test failed. Check connection.</span>';}
 }
- 
+
 async function loadStats(){
   try{const r=await fetch(SERVER+'/api/stats');const d=await r.json();document.getElementById('stT').textContent=d.total_scans||0;document.getElementById('stA').textContent=(d.avg_score||0)+'/100';document.getElementById('stC').textContent=d.total_criticals||0;}catch{}
 }
 loadStats();
- 
+
 document.addEventListener('DOMContentLoaded',()=>{
   ['rid1','rid2'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter')goRep(id);}));
   document.getElementById('ipInp')?.addEventListener('keydown',e=>{if(e.key==='Enter')lookupIP();});
@@ -490,4 +506,3 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
- 
