@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sheildscan
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: COPILOT_MODEL
+        value: gpt-4o-mini
+      - key: DEBUG
+        value: false
