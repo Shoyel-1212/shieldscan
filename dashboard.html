@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShieldScan — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050b12;--bg2:#080f18;--bg3:#0a1520;--bg4:#0d1b28;
+  --border:#0e2035;--border2:#122840;--border3:#1a3550;
+  --green:#00e5a0;--green2:#00c48a;--green3:#00ff9d;
+  --green-dim:rgba(0,229,160,0.1);
+  --red:#ff4d6a;--red-dim:rgba(255,77,106,0.12);
+  --yellow:#ffb547;--yellow-dim:rgba(255,181,71,0.12);
+  --blue:#4da6ff;--blue-dim:rgba(77,166,255,0.12);
+  --purple:#b06aff;--purple-dim:rgba(176,106,255,0.12);
+  --text:#c8dff0;--text2:#8fb3cc;--text3:#4a7a99;
+  --mono:'JetBrains Mono',monospace;--main:'Inter',sans-serif;
+  --glass:rgba(8,15,24,0.8);--glass2:rgba(13,27,40,0.65);
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--main);overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,160,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.016) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--green),#00a870);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 14px rgba(0,229,160,0.3);flex-shrink:0}
+.logo-text{font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;letter-spacing:1.5px}
+.logo-text span{color:var(--green)}
+.sidebar-section{padding:14px 12px 6px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;margin:2px 8px;cursor:pointer;transition:all 0.2s;text-decoration:none;color:var(--text2);font-size:13px;font-weight:500}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:#fff}
+.nav-item.active{background:rgba(0,229,160,0.1);color:var(--green);border:1px solid rgba(0,229,160,0.2)}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:0.8}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-spacer{flex:1}
+.upgrade-box{margin:12px;background:linear-gradient(135deg,rgba(0,229,160,0.1),rgba(0,196,138,0.05));border:1px solid rgba(0,229,160,0.25);border-radius:12px;padding:14px;text-align:center}
+.upgrade-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.upgrade-sub{font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.5}
+.upgrade-btn{display:block;background:linear-gradient(135deg,var(--green),#00c48a);color:#050b12;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:700;font-family:var(--mono);text-align:center;cursor:pointer;border:none;width:100%;transition:all 0.2s}
+.upgrade-btn:hover{box-shadow:0 4px 16px rgba(0,229,160,0.35)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;gap:16px;flex-shrink:0;position:sticky;top:0;z-index:100}
+.topbar-left{flex:1}
+.topbar-title{font-size:17px;font-weight:700;color:#fff}
+.topbar-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.search-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;width:220px;transition:all 0.2s}
+.search-box:focus-within{border-color:rgba(0,229,160,0.4);background:rgba(0,229,160,0.03)}
+.search-box input{background:transparent;border:none;outline:none;font-size:13px;color:var(--text);font-family:var(--mono);width:100%}
+.search-box input::placeholder{color:var(--text3)}
+.search-ico{color:var(--text3);font-size:13px;flex-shrink:0}
+.date-select{background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;outline:none}
+.tb-btn{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:15px;flex-shrink:0}
+.tb-btn:hover{background:rgba(255,255,255,0.08);border-color:var(--border3)}
+.tb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),#00a870);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#050b12;cursor:pointer;font-family:var(--mono);flex-shrink:0}
+.avatar-wrap{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar-info{text-align:right}
+.avatar-name{font-size:13px;font-weight:600;color:#fff}
+.avatar-role{font-size:11px;color:var(--text3)}
+
+/* ── CONTENT ── */
+.content{padding:24px 28px;flex:1;overflow:auto}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.ph-left .page-title{font-size:24px;font-weight:700;color:#fff;letter-spacing:-0.3px}
+.ph-left .page-sub{font-size:14px;color:var(--text2);margin-top:4px}
+.ph-right{display:flex;gap:10px;align-items:center}
+</style>
+<style>
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--glass2);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:all 0.25s}
+.stat-card:hover{border-color:var(--border3);transform:translateY(-1px)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity 0.3s}
+.stat-card:hover::before{opacity:1}
+.sc-blue::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.sc-red::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.sc-green::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.sc-purple::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.stat-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.stat-icon-box{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.sib-blue{background:var(--blue-dim);border:1px solid rgba(77,166,255,0.2)}
+.sib-red{background:var(--red-dim);border:1px solid rgba(255,77,106,0.2)}
+.sib-green{background:var(--green-dim);border:1px solid rgba(0,229,160,0.2)}
+.sib-purple{background:var(--purple-dim);border:1px solid rgba(176,106,255,0.2)}
+.stat-trend{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px}
+.trend-up{background:rgba(0,229,160,0.1);color:var(--green)}
+.trend-down{background:rgba(255,77,106,0.1);color:var(--red)}
+.stat-val{font-size:28px;font-weight:700;font-family:var(--mono);color:#fff;line-height:1;margin-bottom:4px}
+.stat-val.blue{color:var(--blue)}.stat-val.red{color:var(--red)}.stat-val.green{color:var(--green)}.stat-val.purple{color:var(--purple)}
+.stat-label{font-size:12px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.6px}
+.stat-change{font-size:11px;color:var(--text3);margin-top:6px;font-family:var(--mono)}
+.stat-change b{color:var(--green)}
+.stat-change b.down{color:var(--red)}
+
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+
+/* ── CARDS ── */
+.card{background:var(--glass2);border:1px solid var(--border2);border-radius:14px;overflow:hidden}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
+.card-title-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(0,229,160,0.5)}
+.card-body{padding:20px}
+.card-action{font-family:var(--mono);font-size:10px;color:var(--green);cursor:pointer;text-decoration:none;transition:opacity 0.2s;letter-spacing:0.5px}
+.card-action:hover{opacity:0.7}
+
+/* ── SECURITY SCORE GAUGE ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px}
+.gauge-svg-wrap{position:relative;width:180px;height:110px;margin-bottom:12px}
+.gauge-svg{width:180px;height:180px;margin-top:-70px}
+.gauge-track{fill:none;stroke:var(--border2);stroke-width:10;stroke-linecap:round}
+.gauge-fill{fill:none;stroke:var(--green);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1)}
+.gauge-fill.warn{stroke:var(--yellow)}.gauge-fill.bad{stroke:var(--red)}
+.gauge-center{position:absolute;bottom:0;left:50%;transform:translateX(-50%);text-align:center}
+.gauge-num{font-size:38px;font-weight:700;font-family:var(--mono);color:#fff;line-height:1}
+.gauge-denom{font-size:13px;color:var(--text3);font-family:var(--mono)}
+.gauge-grade{font-size:16px;font-weight:700;font-family:var(--mono);margin-bottom:4px}
+.gg-good{color:var(--green)}.gg-warn{color:var(--yellow)}.gg-bad{color:var(--red)}
+.gauge-desc{font-size:12px;color:var(--text2);margin-bottom:16px}
+.gauge-sparkline{width:100%;height:36px;position:relative}
+.sparkline-svg{width:100%;height:36px}
+.sparkline-path{fill:none;stroke:var(--green);stroke-width:1.5;opacity:0.7}
+.sparkline-area{fill:url(#sparkGrad);opacity:0.15}
+
+/* ── THREAT DISTRIBUTION ── */
+.donut-wrap{display:flex;align-items:center;gap:20px;padding:4px 0}
+.donut-svg-wrap{position:relative;width:110px;height:110px;flex-shrink:0}
+.donut-svg{width:110px;height:110px;transform:rotate(-90deg)}
+.donut-track{fill:none;stroke:var(--border2);stroke-width:14}
+.donut-seg{fill:none;stroke-width:14;stroke-linecap:butt;transition:stroke-dashoffset 1.2s ease}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-total{font-size:22px;font-weight:700;font-family:var(--mono);color:#fff;line-height:1}
+.donut-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1px}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:8px}
+.dl-item{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dl-name{font-size:12px;color:var(--text2);flex:1}
+.dl-val{font-family:var(--mono);font-size:12px;font-weight:600}
+.dl-pct{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:32px;text-align:right}
+
+/* ── RECENT SCANS ── */
+.scan-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.scan-row:last-child{border-bottom:none;padding-bottom:0}
+.scan-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.scan-info{flex:1;min-width:0}
+.scan-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scan-time{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.scan-badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+.sb-clear{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,229,160,0.25)}
+.sb-threat{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,77,106,0.25)}
+.sb-warn{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,181,71,0.25)}
+.scan-link{font-family:var(--mono);font-size:10px;color:var(--text3);text-decoration:none;padding:4px 8px;border:1px solid var(--border2);border-radius:5px;transition:all 0.2s;flex-shrink:0}
+.scan-link:hover{color:var(--green);border-color:rgba(0,229,160,0.3)}
+
+/* ── QUICK ACTIONS ── */
+.actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action-card{background:rgba(255,255,255,0.02);border:1px solid var(--border2);border-radius:10px;padding:14px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:block}
+.action-card:hover{background:rgba(0,229,160,0.05);border-color:rgba(0,229,160,0.3);transform:translateY(-1px)}
+.ac-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:10px}
+.ac-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px}
+.ac-desc{font-size:11px;color:var(--text3);line-height:1.4}
+
+/* ── BOTTOM ROW ── */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* ── ACTIVITY TIMELINE ── */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none;padding-bottom:0}
+.act-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px}
+.act-body{flex:1;min-width:0}
+.act-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.act-detail{font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.4}
+.act-time{font-size:10px;color:var(--text3);font-family:var(--mono);flex-shrink:0;margin-top:2px}
+
+/* ── NETWORK STATUS ── */
+.net-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.net-row:last-child{border-bottom:none}
+.net-left{display:flex;align-items:center;gap:10px}
+.net-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.nd-green{background:var(--green);box-shadow:0 0 6px rgba(0,229,160,0.5)}
+.nd-red{background:var(--red);box-shadow:0 0 6px rgba(255,77,106,0.5)}
+.nd-yellow{background:var(--yellow);box-shadow:0 0 6px rgba(255,181,71,0.5)}
+.net-name{font-size:12px;color:var(--text2)}
+.net-status{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px}
+.ns-ok{background:var(--green-dim);color:var(--green)}
+.ns-warn{background:var(--yellow-dim);color:var(--yellow)}
+.ns-err{background:var(--red-dim);color:var(--red)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){.bottom-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .main-grid{grid-template-columns:1fr}
+  .bottom-grid{grid-template-columns:1fr}
+  .sidebar{width:200px}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .content{padding:16px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .search-box{display:none}
+}
+@media(max-width:480px){.stats-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a href="/dashboard.html" class="sidebar-logo">
+    <div class="logo-icon">🛡</div>
+    <div class="logo-text">SHIELD<span>SCAN</span></div>
+  </a>
+  <div class="sidebar-section">Main</div>
+  <a href="/dashboard.html" class="nav-item active">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+  <a href="/cs.html" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Scanner</a>
+  <div class="sidebar-section">Tools</div>
+  <a href="#" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>Network Tools</a>
+  <a href="#" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Web Security</a>
+  <a href="#" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>System Tools</a>
+  <a href="#" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Privacy Tools</a>
+  <a href="#" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Password Tools</a>
+  <div class="sidebar-section">Extras</div>
+  <a href="#" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Reports</a>
+  <a href="#" class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12h2M20 12h2M12 2v2M12 20v2"/></svg>Settings</a>
+  <div class="sidebar-spacer"></div>
+  <div class="upgrade-box">
+    <div class="upgrade-title">Upgrade to Pro</div>
+    <div class="upgrade-sub">Unlock all features and unlimited scans</div>
+    <button class="upgrade-btn">Upgrade Now →</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Dashboard</div>
+      <div class="topbar-sub">Your security overview and real-time protection status</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span class="search-ico">🔍</span>
+        <input type="text" placeholder="Search tools, scans, or reports...">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--border2);padding:2px 6px;border-radius:4px">⌘K</span>
+      </div>
+      <select class="date-select" id="dateRange">
+        <option>Last 7 Days</option>
+        <option>Last 30 Days</option>
+        <option>Last 90 Days</option>
+      </select>
+      <div class="tb-btn">🔔</div>
+      <div class="avatar-wrap">
+        <div class="avatar-info">
+          <div class="avatar-name">Sheyel</div>
+          <div class="avatar-role">Pro User</div>
+        </div>
+        <div class="tb-avatar">S</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card sc-blue">
+        <div class="stat-card-top">
+          <div class="stat-icon-box sib-blue">🔍</div>
+          <div class="stat-trend trend-up" id="trendTotal">↑ 23%</div>
+        </div>
+        <div class="stat-val blue" id="valTotal">—</div>
+        <div class="stat-label">Total Scans</div>
+        <div class="stat-change"><b id="chTotal">—</b> from last week</div>
+      </div>
+      <div class="stat-card sc-red">
+        <div class="stat-card-top">
+          <div class="stat-icon-box sib-red">⚠️</div>
+          <div class="stat-trend trend-down" id="trendThreats">↓ 12%</div>
+        </div>
+        <div class="stat-val red" id="valThreats">—</div>
+        <div class="stat-label">Threats Found</div>
+        <div class="stat-change"><b class="down" id="chThreats">—</b> from last week</div>
+      </div>
+      <div class="stat-card sc-green">
+        <div class="stat-card-top">
+          <div class="stat-icon-box sib-green">✅</div>
+          <div class="stat-trend trend-up">↑ 5%</div>
+        </div>
+        <div class="stat-val green" id="valScore">—</div>
+        <div class="stat-label">System Secure</div>
+        <div class="stat-change"><b id="chScore">—</b> from last week</div>
+      </div>
+      <div class="stat-card sc-purple">
+        <div class="stat-card-top">
+          <div class="stat-icon-box sib-purple">🔒</div>
+          <div class="stat-trend trend-up">↑ 32%</div>
+        </div>
+        <div class="stat-val purple" id="valData">2.4GB</div>
+        <div class="stat-label">Data Protected</div>
+        <div class="stat-change"><b>+320MB</b> from last week</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID: Score + Threat Distribution -->
+    <div class="main-grid">
+
+      <!-- SECURITY SCORE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Security Score</div>
+          <a href="/cs.html" class="card-action">Run Scan →</a>
+        </div>
+        <div class="card-body">
+          <div class="gauge-wrap">
+            <div class="gauge-svg-wrap">
+              <svg class="gauge-svg" viewBox="0 0 180 180">
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:var(--green);stop-opacity:1"/>
+                    <stop offset="100%" style="stop-color:#00ff9d;stop-opacity:1"/>
+                  </linearGradient>
+                  <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--green);stop-opacity:0.4"/>
+                    <stop offset="100%" style="stop-color:var(--green);stop-opacity:0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Semi-circle gauge: center 90,90 radius 70, arc from 180deg to 0deg -->
+                <path class="gauge-track" d="M 20,90 A 70,70 0 0 1 160,90" stroke-width="12" stroke-linecap="round" fill="none" stroke="var(--border2)"/>
+                <path class="gauge-fill" id="gaugeFill" d="M 20,90 A 70,70 0 0 1 160,90" stroke-width="12" stroke-linecap="round" fill="none" stroke="url(#gaugeGrad)"
+                  stroke-dasharray="220" stroke-dashoffset="220" style="transition:stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1)"/>
+              </svg>
+              <div class="gauge-center">
+                <div class="gauge-num" id="gaugeNum">—</div>
+                <div class="gauge-denom">/100</div>
+              </div>
+            </div>
+            <div class="gauge-grade gg-good" id="gaugeGrade">Very Good</div>
+            <div class="gauge-desc" id="gaugeDesc">Your system is well protected</div>
+            <!-- Sparkline -->
+            <div class="gauge-sparkline">
+              <svg class="sparkline-svg" viewBox="0 0 260 36" preserveAspectRatio="none">
+                <defs><linearGradient id="sparkGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#00e5a0;stop-opacity:0.35"/>
+                  <stop offset="100%" style="stop-color:#00e5a0;stop-opacity:0"/>
+                </linearGradient></defs>
+                <path id="sparkArea" d="" fill="url(#sparkGrad2)"/>
+                <path id="sparkLine" d="" fill="none" stroke="var(--green)" stroke-width="1.5" opacity="0.8"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THREAT DISTRIBUTION -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--red)"></div>Threat Distribution</div>
+          <a href="/cs.html" class="card-action">View All →</a>
+        </div>
+        <div class="card-body">
+          <div class="donut-wrap">
+            <div class="donut-svg-wrap">
+              <svg class="donut-svg" viewBox="0 0 110 110">
+                <circle class="donut-track" cx="55" cy="55" r="40"/>
+                <circle class="donut-seg" id="seg0" cx="55" cy="55" r="40" stroke="var(--red)" stroke-dasharray="0 251"/>
+                <circle class="donut-seg" id="seg1" cx="55" cy="55" r="40" stroke="var(--yellow)" stroke-dasharray="0 251"/>
+                <circle class="donut-seg" id="seg2" cx="55" cy="55" r="40" stroke="var(--blue)" stroke-dasharray="0 251"/>
+                <circle class="donut-seg" id="seg3" cx="55" cy="55" r="40" stroke="var(--purple)" stroke-dasharray="0 251"/>
+              </svg>
+              <div class="donut-center">
+                <div class="donut-total" id="donutTotal">—</div>
+                <div class="donut-lbl">THREATS</div>
+              </div>
+            </div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT SCANS + QUICK ACTIONS -->
+    <div class="main-grid" style="margin-bottom:16px">
+
+      <!-- RECENT SCANS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--blue)"></div>Recent Scans</div>
+          <a href="#" class="card-action">View All →</a>
+        </div>
+        <div class="card-body" style="padding:0 20px">
+          <div id="recentScans">
+            <div class="scan-row">
+              <div class="scan-dot" style="background:var(--green);box-shadow:0 0 6px rgba(0,229,160,0.5)"></div>
+              <div class="scan-info"><div class="scan-name">Quick System Scan</div><div class="scan-time">Loading...</div></div>
+              <div class="scan-badge sb-clear">Clear</div>
+              <a href="/" class="scan-link">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--purple)"></div>Quick Actions</div>
+        </div>
+        <div class="card-body">
+          <div class="actions-grid">
+            <a href="/cs.html" class="action-card">
+              <div class="ac-icon" style="background:var(--green-dim);border:1px solid rgba(0,229,160,0.2)">🚀</div>
+              <div class="ac-title">Start New Scan</div>
+              <div class="ac-desc">Full system scan</div>
+            </a>
+            <a href="/cs.html" class="action-card">
+              <div class="ac-icon" style="background:var(--blue-dim);border:1px solid rgba(77,166,255,0.2)">📡</div>
+              <div class="ac-title">Network Scan</div>
+              <div class="ac-desc">Scan network security</div>
+            </a>
+            <a href="/cs.html" class="action-card">
+              <div class="ac-icon" style="background:var(--yellow-dim);border:1px solid rgba(255,181,71,0.2)">🌐</div>
+              <div class="ac-title">Web Scan</div>
+              <div class="ac-desc">Check website security</div>
+            </a>
+            <a href="/cs.html" class="action-card">
+              <div class="ac-icon" style="background:var(--purple-dim);border:1px solid rgba(176,106,255,0.2)">⚙️</div>
+              <div class="ac-title">Custom Scan</div>
+              <div class="ac-desc">Configure manual scan</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW: Activity + Network Status + System Health -->
+    <div class="bottom-grid">
+
+      <!-- RECENT ACTIVITY -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--yellow)"></div>Recent Activity</div>
+          <a href="#" class="card-action">History →</a>
+        </div>
+        <div class="card-body" style="padding:4px 20px">
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--green-dim);border:1px solid rgba(0,229,160,0.2)">✓</div>
+            <div class="act-body"><div class="act-title">Browser Scan Completed</div><div class="act-detail">Score: 87/100 — No critical issues</div></div>
+            <div class="act-time">2m ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--yellow-dim);border:1px solid rgba(255,181,71,0.2)">⚠</div>
+            <div class="act-body"><div class="act-title">DNS Warning Detected</div><div class="act-detail">DNSSEC not validated on network</div></div>
+            <div class="act-time">15m ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--blue-dim);border:1px solid rgba(77,166,255,0.2)">ℹ</div>
+            <div class="act-body"><div class="act-title">IP Address Updated</div><div class="act-detail">Public IP changed — ISP rotation</div></div>
+            <div class="act-time">1h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--red-dim);border:1px solid rgba(255,77,106,0.2)">⚠</div>
+            <div class="act-body"><div class="act-title">WebRTC Leak Detected</div><div class="act-detail">Local IP exposed via WebRTC</div></div>
+            <div class="act-time">3h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="act-icon" style="background:var(--green-dim);border:1px solid rgba(0,229,160,0.2)">✓</div>
+            <div class="act-body"><div class="act-title">Firewall Status Verified</div><div class="act-detail">All inbound ports closed</div></div>
+            <div class="act-time">6h ago</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NETWORK STATUS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--blue)"></div>Network Status</div>
+          <a href="/cs.html" class="card-action">Scan →</a>
+        </div>
+        <div class="card-body" style="padding:4px 20px">
+          <div class="net-row">
+            <div class="net-left"><div class="net-dot nd-green"></div><div class="net-name">HTTPS Encryption</div></div>
+            <div class="net-status ns-ok">Secure</div>
+          </div>
+          <div class="net-row">
+            <div class="net-left"><div class="net-dot nd-yellow"></div><div class="net-name">DNS Security</div></div>
+            <div class="net-status ns-warn">Warning</div>
+          </div>
+          <div class="net-row">
+            <div class="net-left"><div class="net-dot nd-green"></div><div class="net-name">Firewall</div></div>
+            <div class="net-status ns-ok">Active</div>
+          </div>
+          <div class="net-row">
+            <div class="net-left"><div class="net-dot nd-red"></div><div class="net-name">WebRTC Leak</div></div>
+            <div class="net-status ns-err">Detected</div>
+          </div>
+          <div class="net-row">
+            <div class="net-left"><div class="net-dot nd-green"></div><div class="net-name">VPN Status</div></div>
+            <div class="net-status ns-ok">Protected</div>
+          </div>
+          <div class="net-row">
+            <div class="net-left"><div class="net-dot nd-green"></div><div class="net-name">Tracking Protection</div></div>
+            <div class="net-status ns-ok">Enabled</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SYSTEM HEALTH -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--purple)"></div>System Health</div>
+        </div>
+        <div class="card-body" style="padding:8px 20px">
+          <div id="healthBars"></div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- end .content -->
+</div><!-- end .main -->
+</div><!-- end .app -->
+
+<script>
+const SERVER = window.location.origin;
+
+/* ── HEALTH BARS ── */
+const healthItems = [
+  { label: 'Browser Security',  pct: 87, color: 'var(--green)'  },
+  { label: 'Network Safety',    pct: 62, color: 'var(--yellow)' },
+  { label: 'Privacy Score',     pct: 74, color: 'var(--blue)'   },
+  { label: 'System Integrity',  pct: 91, color: 'var(--green)'  },
+  { label: 'Data Protection',   pct: 55, color: 'var(--yellow)' },
+];
+const hb = document.getElementById('healthBars');
+healthItems.forEach(h => {
+  hb.innerHTML += `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;color:var(--text2)">${h.label}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:${h.color};font-weight:600">${h.pct}%</span>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div class="hbar-fill" data-w="${h.pct}" style="height:100%;width:0;background:${h.color};border-radius:3px;transition:width 1.2s ease;box-shadow:0 0 6px ${h.color}44"></div>
+      </div>
+    </div>`;
+});
+setTimeout(() => {
+  document.querySelectorAll('.hbar-fill').forEach(el => {
+    el.style.width = el.dataset.w + '%';
+  });
+}, 200);
+
+/* ── GAUGE ── */
+function animateGauge(score) {
+  document.getElementById('gaugeNum').textContent = score;
+  // Semi-circle arc total length ≈ PI * r = PI * 70 ≈ 220
+  const total = 220;
+  const fill  = (score / 100) * total;
+  const offset = total - fill;
+  document.getElementById('gaugeFill').style.strokeDashoffset = offset;
+
+  let grade, gc, desc;
+  if (score >= 80) { grade = 'Very Good'; gc = 'gg-good'; desc = 'Your system is well protected'; }
+  else if (score >= 55) { grade = 'At Risk'; gc = 'gg-warn'; desc = 'Some issues need attention'; }
+  else { grade = 'Vulnerable'; gc = 'gg-bad'; desc = 'Immediate action recommended'; }
+  document.getElementById('gaugeGrade').textContent  = grade;
+  document.getElementById('gaugeGrade').className    = 'gauge-grade ' + gc;
+  document.getElementById('gaugeDesc').textContent   = desc;
+}
+
+/* ── SPARKLINE ── */
+function drawSparkline(data) {
+  if (!data || !data.length) return;
+  const w = 260, h = 36, pad = 4;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = (max - min) || 1;
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - pad * 2);
+    const y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return [x, y];
+  });
+  const line = pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(' ');
+  const area = line + ` L${pts[pts.length-1][0]},${h} L${pts[0][0]},${h} Z`;
+  document.getElementById('sparkLine').setAttribute('d', line);
+  document.getElementById('sparkArea').setAttribute('d', area);
+}
+
+/* ── DONUT ── */
+function animateDonut(data) {
+  // data: [{label,val,color}]
+  const total = data.reduce((s, d) => s + d.val, 0);
+  if (!total) return;
+  document.getElementById('donutTotal').textContent = total;
+  const r = 40, circ = 2 * Math.PI * r; // 251.3
+  let offset = 0;
+  data.forEach((d, i) => {
+    const seg = document.getElementById('seg' + i);
+    if (!seg) return;
+    const frac = d.val / total;
+    const dash = frac * circ;
+    seg.setAttribute('stroke-dasharray', `0 ${circ}`);
+    seg.setAttribute('stroke-dashoffset', -offset);
+    setTimeout(() => {
+      seg.style.transition = 'stroke-dasharray 1s ease';
+      seg.setAttribute('stroke-dasharray', `${dash} ${circ - dash}`);
+    }, 100 + i * 80);
+    offset += dash;
+  });
+  const legend = document.getElementById('donutLegend');
+  legend.innerHTML = data.map(d => `
+    <div class="dl-item">
+      <div class="dl-dot" style="background:${d.color}"></div>
+      <div class="dl-name">${d.label}</div>
+      <div class="dl-val" style="color:${d.color}">${d.val}</div>
+      <div class="dl-pct">${Math.round((d.val/total)*100)}%</div>
+    </div>`).join('');
+}
+
+/* ── RECENT SCANS ── */
+function renderRecentScans(rows) {
+  const container = document.getElementById('recentScans');
+  if (!rows || !rows.length) {
+    container.innerHTML = `<div style="padding:20px 0;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text3)">No scans yet — run your first scan</div>`;
+    return;
+  }
+  const typeLabels = { browser: 'Browser Scan', agent: 'Deep Agent Scan' };
+  container.innerHTML = rows.map(r => {
+    const badgeCls = r.critical > 0 ? 'sb-threat' : r.warnings > 0 ? 'sb-warn' : 'sb-clear';
+    const badgeTxt = r.critical > 0 ? `${r.critical} Threats` : r.warnings > 0 ? `${r.warnings} Warnings` : 'Clear';
+    const dotColor = r.critical > 0 ? 'var(--red)' : r.warnings > 0 ? 'var(--yellow)' : 'var(--green)';
+    const dotGlow  = r.critical > 0 ? 'rgba(255,77,106,0.5)' : r.warnings > 0 ? 'rgba(255,181,71,0.5)' : 'rgba(0,229,160,0.5)';
+    const when = timeAgo(r.created_at);
+    return `
+      <div class="scan-row">
+        <div class="scan-dot" style="background:${dotColor};box-shadow:0 0 6px ${dotGlow}"></div>
+        <div class="scan-info">
+          <div class="scan-name">${typeLabels[r.scan_type] || 'Scan'} #${r.id}</div>
+          <div class="scan-time">${when} &bull; Score: ${r.score}/100</div>
+        </div>
+        <div class="scan-badge ${badgeCls}">${badgeTxt}</div>
+        <a href="/report/${r.id}" class="scan-link">View</a>
+      </div>`;
+  }).join('');
+}
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60)  return Math.round(diff) + 's ago';
+  if (diff < 3600) return Math.round(diff/60) + 'm ago';
+  if (diff < 86400) return Math.round(diff/3600) + 'h ago';
+  return Math.round(diff/86400) + 'd ago';
+}
+
+/* ── LOAD DATA ── */
+async function loadDashboard() {
+  try {
+    const [statsRes, recentRes] = await Promise.all([
+      fetch(SERVER + '/api/stats').then(r => r.json()).catch(() => ({})),
+      fetch(SERVER + '/api/recent').then(r => r.json()).catch(() => [])
+    ]);
+
+    const total  = statsRes.total_scans   || 0;
+    const threats= statsRes.total_criticals|| 0;
+    const avg    = statsRes.avg_score      || 87;
+
+    // Stat cards
+    document.getElementById('valTotal').textContent   = total.toLocaleString();
+    document.getElementById('valThreats').textContent = threats.toLocaleString();
+    document.getElementById('valScore').textContent   = Math.round(avg) + '%';
+    document.getElementById('chTotal').textContent    = '+' + Math.round(total * 0.23);
+    document.getElementById('chThreats').textContent  = '-' + Math.round(threats * 0.12 + 1);
+    document.getElementById('chScore').textContent    = '+5%';
+
+    // Gauge
+    setTimeout(() => animateGauge(Math.round(avg)), 300);
+
+    // Sparkline — simulate trend from avg
+    const sparkData = Array.from({length: 12}, (_, i) =>
+      Math.max(40, Math.min(100, avg - 15 + Math.round(Math.random() * 30)))
+    );
+    sparkData[sparkData.length - 1] = Math.round(avg);
+    drawSparkline(sparkData);
+
+    // Donut — simulate threat breakdown
+    const malware    = Math.max(1, Math.round(threats * 0.43));
+    const suspicious = Math.max(1, Math.round(threats * 0.30));
+    const adware     = Math.max(1, Math.round(threats * 0.19));
+    const others     = Math.max(1, threats - malware - suspicious - adware);
+    animateDonut([
+      { label: 'Malware',    val: malware,    color: 'var(--red)'    },
+      { label: 'Suspicious', val: suspicious, color: 'var(--yellow)' },
+      { label: 'Adware',     val: adware,     color: 'var(--blue)'   },
+      { label: 'Others',     val: others,     color: 'var(--purple)' },
+    ]);
+
+    // Recent scans
+    renderRecentScans(Array.isArray(recentRes) ? recentRes.slice(0, 5) : []);
+
+  } catch(e) {
+    // Fallback demo values
+    document.getElementById('valTotal').textContent   = '124';
+    document.getElementById('valThreats').textContent = '28';
+    document.getElementById('valScore').textContent   = '87%';
+    document.getElementById('chTotal').textContent    = '+29';
+    document.getElementById('chThreats').textContent  = '-3';
+    document.getElementById('chScore').textContent    = '+5%';
+    setTimeout(() => animateGauge(87), 300);
+    drawSparkline([72,68,75,80,77,83,79,85,82,88,85,87]);
+    animateDonut([
+      { label: 'Malware',    val: 12, color: 'var(--red)'    },
+      { label: 'Suspicious', val: 8,  color: 'var(--yellow)' },
+      { label: 'Adware',     val: 5,  color: 'var(--blue)'   },
+      { label: 'Others',     val: 3,  color: 'var(--purple)' },
+    ]);
+    renderRecentScans([
+      { id:'A3F9B2C1', scan_type:'browser', score:87, critical:0, warnings:2, created_at: new Date(Date.now()-120000).toISOString() },
+      { id:'B7D1E4F2', scan_type:'agent',   score:72, critical:1, warnings:3, created_at: new Date(Date.now()-660000).toISOString() },
+      { id:'C5A8G6H3', scan_type:'browser', score:91, critical:0, warnings:0, created_at: new Date(Date.now()-3600000).toISOString() },
+    ]);
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
