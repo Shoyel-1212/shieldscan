@@ -1,7 +1,8 @@
 services:
   - type: web
-    name: sheildscan
+    name: shieldscan
     env: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
@@ -12,4 +13,5 @@ services:
       - key: COPILOT_MODEL
         value: gpt-4o-mini
       - key: DEBUG
-        value: false
+        value: "false"
+    healthCheckPath: /api/stats

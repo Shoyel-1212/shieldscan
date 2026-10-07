@@ -1,4 +1,4 @@
-"""
+﻿"""
 ShieldScan — Stage 3 Backend Server
 Full Platform: Database + API + Web Dashboard
 
@@ -40,7 +40,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-DB_FILE    = "shieldscan.db"
+DB_FILE    = os.environ.get("DB_PATH", "shieldscan.db")
 SECRET_KEY = os.environ.get("SECRET_KEY", "shieldscan-dev-key-change-in-production")
 app.secret_key = SECRET_KEY
 
